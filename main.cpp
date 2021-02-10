@@ -8,9 +8,9 @@
 #include <iostream>
 #include <iomanip>  // cout precision
 #include <math.h>
-#include "TSearch.h"
-#include "VectorMatrix.h"
-#include "Worm.h"
+#include "modules/TSearch.h"
+#include "modules/VectorMatrix.h"
+#include "modules/Worm.h"
 
 #define EVOLVE
 #define PRINTTOFILE
@@ -265,7 +265,8 @@ int main (int argc, const char* argv[])
 {
     std::cout << std::setprecision(10);
 
-    long randomseed = static_cast<long>(time(NULL));
+    // long randomseed = static_cast<long>(time(NULL));
+    long randomseed = 0;
 
     if (argc == 2)
         randomseed += atoi(argv[1]);

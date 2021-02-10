@@ -1,20 +1,20 @@
 main: main.o Worm.o WormBody.o NervousSystem.o StretchReceptor.o Muscles.o TSearch.o random.o
 	g++ -pthread -o main main.o Worm.o WormBody.o NervousSystem.o StretchReceptor.o Muscles.o TSearch.o random.o
-random.o: random.cpp random.h VectorMatrix.h
-	g++ -c -O3 -flto random.cpp
-TSearch.o: TSearch.cpp TSearch.h
-	g++ -c -O3 -flto TSearch.cpp
-Worm.o: Worm.cpp Worm.h
-	g++ -c -O3 -flto Worm.cpp
-WormBody.o: WormBody.cpp WormBody.h
-	g++ -c -O3 -flto WormBody.cpp
-NervousSystem.o: NervousSystem.cpp NervousSystem.h VectorMatrix.h random.h
-	g++ -c -O3 -flto NervousSystem.cpp
-StretchReceptor.o: StretchReceptor.cpp StretchReceptor.h
-	g++ -c -O3 -flto StretchReceptor.cpp
-Muscles.o: Muscles.cpp Muscles.h VectorMatrix.h random.h
-	g++ -c -O3 -flto Muscles.cpp
-main.o: main.cpp Worm.h WormBody.h StretchReceptor.h Muscles.h TSearch.h
+random.o: modules/random.cpp modules/random.h modules/VectorMatrix.h
+	g++ -c -O3 -flto modules/random.cpp
+TSearch.o: modules/TSearch.cpp modules/TSearch.h
+	g++ -c -O3 -flto modules/TSearch.cpp
+Worm.o: modules/Worm.cpp modules/Worm.h
+	g++ -c -O3 -flto modules/Worm.cpp
+WormBody.o: modules/WormBody.cpp modules/WormBody.h
+	g++ -c -O3 -flto modules/WormBody.cpp
+NervousSystem.o: modules/NervousSystem.cpp modules/NervousSystem.h modules/VectorMatrix.h modules/random.h
+	g++ -c -O3 -flto modules/NervousSystem.cpp
+StretchReceptor.o: modules/StretchReceptor.cpp modules/StretchReceptor.h
+	g++ -c -O3 -flto modules/StretchReceptor.cpp
+Muscles.o: modules/Muscles.cpp modules/Muscles.h modules/VectorMatrix.h modules/random.h
+	g++ -c -O3 -flto modules/Muscles.cpp
+main.o: main.cpp modules/Worm.h modules/WormBody.h modules/StretchReceptor.h modules/Muscles.h modules/TSearch.h
 	g++ -c -O3 -flto main.cpp
 clean:
 	rm *.o main
