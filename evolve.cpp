@@ -13,7 +13,7 @@
 #include "modules/Worm.h"
 
 #define EVOLVE
-#define PRINTTOFILE
+// #define PRINTTOFILE
 //#define SEED
 //#define OUTPUT
 //#define SPEEDOUTPUT
@@ -240,7 +240,7 @@ double EvaluationFunctionB(TVector<double> &v, RandomState &rs)
 // ------------------------------------
 // Display functions
 // ------------------------------------
-void EvolutionaryRunDisplay(int Generation, double BestPerf, double AvgPerf, double PerfVar)
+void EvolutionaryRunDisplay(int Generation, double BestPerf, double AvgPerf, double PerfVar) 
 {
     cout << Generation << " " << BestPerf << " " << AvgPerf << " " << PerfVar << endl;
 }
@@ -263,6 +263,7 @@ void ResultsDisplay(TSearch &s)
 #ifdef EVOLVE
 int main (int argc, const char* argv[])
 {
+    std::cout << "> starting evolutionary sim" << endl;
     std::cout << std::setprecision(10);
 
     // long randomseed = static_cast<long>(time(NULL));
@@ -280,6 +281,8 @@ int main (int argc, const char* argv[])
     seedfile << randomseed << endl;
     seedfile.close();
 
+    std::cout << "> finished preprocessing" << endl;
+
     // configure the search
     s.SetRandomSeed(randomseed);
     s.SetPopulationStatisticsDisplayFunction(EvolutionaryRunDisplay);
@@ -287,7 +290,7 @@ int main (int argc, const char* argv[])
     s.SetSelectionMode(RANK_BASED);             //{FITNESS_PROPORTIONATE,RANK_BASED}
     s.SetReproductionMode(GENETIC_ALGORITHM);	// {HILL_CLIMBING, GENETIC_ALGORITHM}
     s.SetPopulationSize(96);
-    s.SetMaxGenerations(1000);
+    s.SetMaxGenerations(500);
     s.SetMutationVariance(0.1);                // For 71 parameters, an estimated avg change of 0.25 for weights (mapped to 15).
     s.SetCrossoverProbability(0.5);
     s.SetCrossoverMode(UNIFORM);              //{UNIFORM, TWO_POINT}
@@ -297,37 +300,49 @@ int main (int argc, const char* argv[])
     s.SetCheckpointInterval(0);
     s.SetReEvaluationFlag(1);
 
+    std::cout << "> finished search configuration" << endl;
+
     // redirect standard output to a file
-#ifdef PRINTTOFILE
-    ofstream evolfile;
-    evolfile.open ("fitness.dat");
-    cout.rdbuf(evolfile.rdbuf());
-#endif
+    #ifdef PRINTTOFILE
+        ofstream evolfile;
+        evolfile.open ("fitness.dat");
+        cout.rdbuf(evolfile.rdbuf());
+        std::cout << "> redirected standard output" << endl;
+        // TODO: program hangs in this block
+    #endif
 
     // Code to run simulation:
     InitializeBodyConstants();
 
-#ifdef SEED
-    ifstream BestIndividualFile;
-    TVector<double> bestVector(1, VectSize);
-    BestIndividualFile.open("best.gen.dat");
-    BestIndividualFile >> bestVector;
-    s.InitializeSearch();
-    for (int i = 1; i <= s.PopulationSize(); i++){
-        for (int j = 1; j <= VectSize; j++)
-        {
-            s.Individual(i)[j] = bestVector[j];
+    std::cout << "> initialized body constants" << endl;
+
+    #ifdef SEED
+        ifstream BestIndividualFile;
+        TVector<double> bestVector(1, VectSize);
+        BestIndividualFile.open("best.gen.dat");
+        BestIndividualFile >> bestVector;
+        s.InitializeSearch();
+        for (int i = 1; i <= s.PopulationSize(); i++){
+            for (int j = 1; j <= VectSize; j++)
+            {
+                s.Individual(i)[j] = bestVector[j];
+            }
         }
-    }
-#endif
+    #endif
 
     s.SetSearchTerminationFunction(NULL);
     s.SetEvaluationFunction(EvaluationFunctionB);
+
+    std::cout << "> set eval and termination functions" << endl;
+
+    std::cout << "> running search..." << endl;
     s.ExecuteSearch();
 
-#ifdef PRINTTOFILE
-    evolfile.close();
-#endif
+    std::cout << "> search complete!" << endl;
+
+    #ifdef PRINTTOFILE
+        evolfile.close();
+    #endif
 
     return 0;
 }
