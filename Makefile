@@ -1,5 +1,7 @@
 evolve: evolve.o Worm.o WormBody.o NervousSystem.o StretchReceptor.o Muscles.o TSearch.o random.o
 	g++ -pthread -o evolve evolve.o Worm.o WormBody.o NervousSystem.o StretchReceptor.o Muscles.o TSearch.o random.o
+demorun: demorun.o Worm.o WormBody.o NervousSystem.o StretchReceptor.o Muscles.o TSearch.o random.o
+	g++ -pthread -o demorun demorun.o Worm.o WormBody.o NervousSystem.o StretchReceptor.o Muscles.o TSearch.o random.o
 random.o: modules/random.cpp modules/random.h modules/VectorMatrix.h
 	g++ -c -O3 -flto modules/random.cpp
 TSearch.o: modules/TSearch.cpp modules/TSearch.h
@@ -16,5 +18,7 @@ Muscles.o: modules/Muscles.cpp modules/Muscles.h modules/VectorMatrix.h modules/
 	g++ -c -O3 -flto modules/Muscles.cpp
 evolve.o: evolve.cpp modules/Worm.h modules/WormBody.h modules/StretchReceptor.h modules/Muscles.h modules/TSearch.h
 	g++ -c -O3 -flto evolve.cpp
+demorun.o: evolve.cpp modules/Worm.h modules/WormBody.h modules/StretchReceptor.h modules/Muscles.h modules/TSearch.h
+	g++ -c -O3 -flto run_worm.cpp
 clean:
-	rm *.o evolve
+	rm *.o *.exe
