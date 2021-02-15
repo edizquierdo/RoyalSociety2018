@@ -19,6 +19,6 @@ Muscles.o: modules/Muscles.cpp modules/Muscles.h modules/VectorMatrix.h modules/
 evolve.o: evolve.cpp modules/Worm.h modules/WormBody.h modules/StretchReceptor.h modules/Muscles.h modules/TSearch.h
 	g++ -c -O3 -flto evolve.cpp
 demorun.o: evolve.cpp modules/Worm.h modules/WormBody.h modules/StretchReceptor.h modules/Muscles.h modules/TSearch.h
-	g++ -c -O3 -flto run_worm.cpp
+	g++ -c -O3 -flto demorun.cpp
 clean:
 	rm *.o *.exe
