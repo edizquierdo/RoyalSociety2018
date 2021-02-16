@@ -99,7 +99,7 @@ def plot_worm_anim(filename = 'body.dat'):
 	# save it
 	line_ani.save('data/worm.mp4', writer = writer)
 
-	print('> done saving!')
+	print('\n\n> done saving!')
 
 
 

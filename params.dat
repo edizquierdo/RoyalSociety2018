@@ -4,8 +4,8 @@ Time-constants:
  DD: 1.25
  VDA/P: 1.25 / 1.25
 Biases: 
- DB: 7.30566e-304
- VBA/P: 7.30566e-304 / 7.30566e-304
+ DB: 1.2005e-303
+ VBA/P: 1.2005e-303 / 1.2005e-303
  DD: 0
  VDA/P: 0 / 0
 Self conns: 
