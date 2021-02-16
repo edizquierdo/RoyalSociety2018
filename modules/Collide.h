@@ -12,7 +12,39 @@ collision code from:
 	year={2012}
 } */
 
+	// If using objects, check for object collisions and calculate associated forces
+	if(N_objects > 0){
+  		realtype P_x,P_y,Distance,magF,D_scale,magF_P1,magF_P2;
+  		ContactForce = 0;
+  		for(int i = 0; i < NBAR; ++i){
+			for(int j = 0; j < 2; ++j){
+				// First ensure they contain zeros
+				F_object[i][j][0] = 0;
+				F_object[i][j][1] = 0;
+				P_x = term[i][j][0];
+				P_y = term[i][j][1];
 
+				// Now check proximity to each object
+				for(int k = 0; k < N_objects; ++k){
+					if((P_x<(Objects[k][0]+Objects[k][2]))&&(P_x>(Objects[k][0]-Objects[k][2]))&&(P_y<(Objects[k][1]+Objects[k][2]))&&(P_y>(Objects[k][1]-Objects[k][2]))){
+
+						//This means the point is within the bounding box of the object, so now we must compute the force (if any)
+						dx = P_x - Objects[k][0];
+						dy = P_y - Objects[k][1];
+						Distance = sqrt(pow(dx,2) + pow(dy,2));
+						D_scale = 0.01*Objects[k][2];
+
+						if(Distance < Objects[k][2]){
+							magF = k_Object*(Objects[k][2] - Distance) + D_scale*k_Object*(pow((Objects[k][2] - Distance)/D_scale,2));
+							F_object[i][j][0] += (dx/Distance)*magF;
+							F_object[i][j][1] += (dy/Distance)*magF;
+							ContactForce += magF;
+						}
+					}			
+				}
+			}
+  		}
+	}
 
   	// Add up force contributions for each D/V point
   	F_term[0][0][0] = -F_H[0][0]*Dir[0][0][0] - F_D[0][0]*Dir_D[0][0][0] + F_object[0][0][0];

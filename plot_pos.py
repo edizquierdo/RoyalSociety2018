@@ -19,7 +19,7 @@ def plot_head_pos(filename = 'body.dat'):
 	plt.show()
 
 
-def read_data(filename):
+def read_body_data(filename):
 	data_raw = np.genfromtxt(filename, delimiter = ' ', dtype = None)
 
 	data_raw = data_raw[:,1:]
@@ -54,7 +54,7 @@ def plot_worm_anim(filename = 'body.dat'):
 	matplotlib.use("Agg")
 	
 	# read the data
-	data = read_data(filename)
+	data = read_body_data(filename)
 	# data = data[:500]
 	
 	# set up the figure object
@@ -102,6 +102,19 @@ def plot_worm_anim(filename = 'body.dat'):
 	print('\n\n> done saving!')
 
 
+def plot_act(filename = 'act.dat'):
+	data_raw = np.genfromtxt(filename, delimiter = ' ', dtype = None)
+
+	T = data_raw[:,0]
+	V = data_raw[:,1:].T
+
+
+	for vv in V:
+		plt.plot(T, vv)
+
+	plt.show()
+
+
 
 def test_anim():
 	matplotlib.use("Agg")
@@ -133,7 +146,8 @@ def test_anim():
 
 if __name__ == '__main__':
 	# plot_head_pos()
-	plot_worm_anim()
+	# plot_worm_anim()
 	# test_anim()
+	plot_act()
 
 
