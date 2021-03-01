@@ -2,6 +2,7 @@
 //#define SEED
 #define OUTPUT
 #define SPEEDOUTPUT
+#define COLLIDE
 
 #include "main.h"
 

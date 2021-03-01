@@ -20,7 +20,15 @@
 
 #include <iostream>
 #include <stdlib.h> 
+#include <vector>
 #include <cmath>
+
+// REVIEW: remove this definition later
+#define COLLISION
+
+#ifdef COLLISION
+    #include "Collide.h"
+#endif
 
 using namespace std;
 
@@ -68,6 +76,10 @@ const double C_water_perp = C_water_perp_total/(2*(N_segments + 1)); // Per rod 
 #endif
 const double C_par        = (C_agar_par - C_water_par)*Medium + C_water_par;    // Per rod tangential drag coefficient in kg/s
 const double C_perp       = (C_agar_perp - C_water_perp)*Medium + C_water_perp; // Per rod normal drag coefficient in kg/s
+
+#ifdef COLLISION
+vector<CollisionObject> CollObjs;
+#endif
 
 
 // Function prototypes
@@ -147,6 +159,53 @@ private:
             cout << endl;
         }
     };
+
+    
+    #ifdef COLLISION
+    void load_CollObjs(char filename[])
+    {
+        // open file
+        ifstream objfile(filename);
+        if (!objfile.is_open())
+        {
+            exit(EXIT_FAILURE);
+        }
+
+        // initialize temp variables
+        double bound_min_x;
+        double bound_min_y;
+
+        double bound_max_x;
+        double bound_max_y;
+
+        double fvec_x;
+        double fvec_y;
+
+        // loop
+        while(
+            objfile 
+            >> bound_min_x >> bound_min_y 
+            >> bound_max_x >> bound_max_y 
+            >> fvec_x >> fvec_y
+        ){
+            CollisionObject tempObj();
+            tempObj.bound_min_x = bound_min_x; 
+            tempObj.bound_min_y = bound_min_y;
+            tempObj.bound_max_x = bound_max_x; 
+            tempObj.bound_max_y = bound_max_y; 
+            tempObj.fvec_x = fvec_x; 
+            tempObj.fvec_y = fvec_y;
+            
+            // store data
+            CollObjs.push_back(tempObj);
+        }
+
+        // close file
+        objfile.close()
+
+    }
+    #endif
+
     
     // Instance variables
     double t;

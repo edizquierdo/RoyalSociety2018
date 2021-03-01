@@ -34,7 +34,7 @@ using namespace std;
 
 
 // Global constants
-
+double M_PI = 3.1415926535897932384626433;
 double R[N_rods];                     // Rod radii in m
 double L_D0[N_rods];                  // Rest length of each diagonal element in m
 double L_L0[N_rods];                  // Rest length of each lateral element in m
@@ -197,6 +197,24 @@ void WormBody::UpdateForces(int start, int end)
         temp = kappa_D*(L_D0[i] - L_V_D[i]) - beta_D*dL_V_D[i];
         f_V_D_x[i] = temp*uD_V_x[i];
         f_V_D_y[i] = temp*uD_V_y[i];
+        // wall collision forces 
+        // included in passive diagonal forces for simplicity
+        #define COLLIDE
+        #ifdef COLLIDE
+            // loop over all collision boxes
+            for ( CollisionObject obj : CollObjs )
+            {
+                // TODO: need to get position here. unclear if `uL_D_x` is the correct variable
+                if (
+                    uL_D_x
+                ){
+                    // TODO: force constant multiplier here? or when exporting vectors
+                    f_V_D_x[i] += obj.fvec_x;
+                    f_V_D_y[i] += obj.fvec_y;
+                }
+            }
+        #endif
+
         // Lateral passive forces
         temp = L_L0[i] - L_D_L[i];
         if (temp < 0) {double temp2 = temp*temp; temp += 16*temp2*temp2;}      // **** NOTE 2 ****
@@ -208,6 +226,7 @@ void WormBody::UpdateForces(int start, int end)
         temp = kappa_L*temp - beta_L*dL_V_L[i];
         f_V_L_x[i] = temp*uL_V_x[i];
         f_V_L_y[i] = temp*uL_V_y[i];
+
         // Lateral active muscle forces
         temp = kappa_M0*A_D_M[i]*(L_L0[i] - A_D_M[i]*L_L0_minus_L_min[i] - L_D_L[i]) - beta_M0*A_D_M[i]*dL_D_L[i];
         f_D_M_x[i] = temp*uL_D_x[i];

@@ -1,5 +1,5 @@
 /* 
-collision code from:
+collision code originally from:
 @article{Boyle_Berri_Cohen_2012, 
  	title={Gait Modulation in C. elegans: An Integrated Neuromechanical Model}, 
 	volume={6}, 
@@ -10,12 +10,34 @@ collision code from:
 	publisher={Frontiers}, 
 	author={Boyle, Jordan Hylke and Berri, Stefano and Cohen, Netta}, 
 	year={2012}
+modified by github.com/mivanit
 } */
 
+
+struct CollisionObject
+{
+	double bound_min_x;
+	double bound_min_y;
+
+	double bound_max_x;
+	double bound_max_y;
+
+	double fvec_x;
+	double fvec_y;
+}
+
+
+
+
+/*
 	// If using objects, check for object collisions and calculate associated forces
 	if(N_objects > 0){
+		// REVIEW: unclear what this does
   		realtype P_x,P_y,Distance,magF,D_scale,magF_P1,magF_P2;
+		// reset contact force
   		ContactForce = 0;
+
+		// for each side of the solid rods that make up the worm body
   		for(int i = 0; i < NBAR; ++i){
 			for(int j = 0; j < 2; ++j){
 				// First ensure they contain zeros
@@ -26,16 +48,28 @@ collision code from:
 
 				// Now check proximity to each object
 				for(int k = 0; k < N_objects; ++k){
-					if((P_x<(Objects[k][0]+Objects[k][2]))&&(P_x>(Objects[k][0]-Objects[k][2]))&&(P_y<(Objects[k][1]+Objects[k][2]))&&(P_y>(Objects[k][1]-Objects[k][2]))){
+					// simple bounding box check
+					if(
+							(P_x < (Objects[k][0]+Objects[k][2]))
+							&& (P_x > (Objects[k][0]-Objects[k][2]))
+							&& (P_y < (Objects[k][1]+Objects[k][2]))
+							&& (P_y > (Objects[k][1]-Objects[k][2]))
+						){
 
-						//This means the point is within the bounding box of the object, so now we must compute the force (if any)
+						// distance to the center of the object. this will need to be changed for non-disc objects
 						dx = P_x - Objects[k][0];
 						dy = P_y - Objects[k][1];
 						Distance = sqrt(pow(dx,2) + pow(dy,2));
 						D_scale = 0.01*Objects[k][2];
 
+						// TODO: instead of checking distance, check inside collision box (see existing python code)
 						if(Distance < Objects[k][2]){
-							magF = k_Object*(Objects[k][2] - Distance) + D_scale*k_Object*(pow((Objects[k][2] - Distance)/D_scale,2));
+							magF = (
+								k_Object * (Objects[k][2] - Distance) 
+								+ D_scale*k_Object * (pow((Objects[k][2] - Distance) / D_scale,2))
+							);
+							// this updates the object forces based on how deep into the object we are
+							// `i` is the segment, and `j` is the ventral/dorsal side
 							F_object[i][j][0] += (dx/Distance)*magF;
 							F_object[i][j][1] += (dy/Distance)*magF;
 							ContactForce += magF;
@@ -53,6 +87,8 @@ collision code from:
   	F_term[0][1][0] = -F_H[0][1]*Dir[0][1][0] - F_D[0][1]*Dir_D[0][1][0] + F_object[0][1][0];
   	F_term[0][1][1] = -F_H[0][1]*Dir[0][1][1] - F_D[0][1]*Dir_D[0][1][1] + F_object[0][1][1];
 
+	// loop over each segment adding force
+	// TODO: this needs to call the data structure used in the Izquierdo code
   	for(int i = 1; i < NSEG; ++i){
 		int i_minus_1 = i-1;
 
@@ -95,3 +131,4 @@ collision code from:
 		rval[three_i+1] = V_CoM[i][1] - ypval[three_i+1];
 		rval[three_i+2] = V_CoM[i][2] - ypval[three_i+2];
   	}
+*/

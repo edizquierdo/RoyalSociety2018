@@ -8,6 +8,7 @@
 #include <iostream>
 #include <iomanip>  // cout precision
 #include <math.h>
+#include <pthread.h>
 #include "modules/TSearch.h"
 #include "modules/VectorMatrix.h"
 #include "modules/Worm.h"
@@ -113,18 +114,18 @@ double EvaluationFunctionB(TVector<double> &v, RandomState &rs)
 {
     double fitness;
 
-#ifdef SPEEDOUTPUT
-    ofstream fitfile;
-    fitfile.open("speed.dat");
-#endif
+    #ifdef SPEEDOUTPUT
+        ofstream fitfile;
+        fitfile.open("speed.dat");
+    #endif
 
-#ifdef OUTPUT
-    ofstream bodyfile, actfile, curvfile, paramsfile, voltagefile;
-    bodyfile.open("body.dat");
-    actfile.open("act.dat");
-    curvfile.open("curv.dat");
-    paramsfile.open("params.dat");
-#endif
+    #ifdef OUTPUT
+        ofstream bodyfile, actfile, curvfile, paramsfile, voltagefile;
+        bodyfile.open("body.dat");
+        actfile.open("act.dat");
+        curvfile.open("curv.dat");
+        paramsfile.open("params.dat");
+    #endif
 
     // Fitness
     fitness = 0.0;
@@ -140,9 +141,9 @@ double EvaluationFunctionB(TVector<double> &v, RandomState &rs)
 
     Worm w(phenotype, 0);
 
-#ifdef OUTPUT
-    w.DumpParams(paramsfile);
-#endif
+    #ifdef OUTPUT
+        w.DumpParams(paramsfile);
+    #endif
 
     w.InitializeState(rs);
 
@@ -150,12 +151,12 @@ double EvaluationFunctionB(TVector<double> &v, RandomState &rs)
     for (double t = 0.0; t <= Transient; t += StepSize)
     {
         w.Step(StepSize, 1);
-#ifdef OUTPUT
-        w.Curvature(curvature);
-        curvfile << curvature << endl;
-        w.DumpBodyState(bodyfile, skip);
-        w.DumpActState(actfile, skip);
-#endif
+        #ifdef OUTPUT
+                w.Curvature(curvature);
+                curvfile << curvature << endl;
+                w.DumpBodyState(bodyfile, skip);
+                w.DumpActState(actfile, skip);
+        #endif
     }
 
     double xt = w.CoMx(), xtp;
@@ -183,26 +184,26 @@ double EvaluationFunctionB(TVector<double> &v, RandomState &rs)
         temp = cos(anglediff) > 0.0 ? 1.0 : -1.0;           // Add to fitness only movement forward
         distancetravelled += temp * sqrt(pow(xt-xtp,2)+pow(yt-ytp,2));
 
-#ifdef OUTPUT
-        w.Curvature(curvature);
-        curvfile << curvature << endl;
-        w.DumpBodyState(bodyfile, skip);
-        w.DumpActState(actfile, skip);
-#endif
+    #ifdef OUTPUT
+            w.Curvature(curvature);
+            curvfile << curvature << endl;
+            w.DumpBodyState(bodyfile, skip);
+            w.DumpActState(actfile, skip);
+    #endif
     }
     fitness = 1 - (fabs(BBCfit-distancetravelled)/BBCfit);
 
-#ifdef OUTPUT
-    cout << fitness << " " << BBCfit << " " << distancetravelled << " " << distancetravelled/Duration << endl;
-    bodyfile.close();
-    actfile.close();
-    curvfile.close();
-#endif
+    #ifdef OUTPUT
+        cout << fitness << " " << BBCfit << " " << distancetravelled << " " << distancetravelled/Duration << endl;
+        bodyfile.close();
+        actfile.close();
+        curvfile.close();
+    #endif
 
-#ifdef SPEEDOUTPUT
-    fitfile << fitness << " "<< BBCfit << " " << distancetravelled << " " << distancetravelled/Duration << " " << endl;
-    fitfile.close();
-#endif
+    #ifdef SPEEDOUTPUT
+        fitfile << fitness << " "<< BBCfit << " " << distancetravelled << " " << distancetravelled/Duration << " " << endl;
+        fitfile.close();
+    #endif
 
     return fitness;
 }

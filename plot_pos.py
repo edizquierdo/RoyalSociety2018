@@ -146,8 +146,8 @@ def test_anim():
 
 if __name__ == '__main__':
 	# plot_head_pos()
-	# plot_worm_anim()
+	plot_worm_anim()
 	# test_anim()
-	plot_act()
+	# plot_act()
 
 
