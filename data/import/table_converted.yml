@@ -1,3 +1,6 @@
+# source is table in supplementary data:
+# https://royalsocietypublishing.org/doi/suppl/10.1098/rstb.2017.0374
+
 tau:
   SMDD: 0.500646
   SMDV: 0.500646
@@ -17,9 +20,6 @@ theta:
   VB: 4.80699
   DD: -2.94785
   VD: -2.94785
-
-# correct up to here
-
 
 weights:
   SMDD:
@@ -73,8 +73,6 @@ r:
   SMDV: -120.535
   DB: -165.138
   VB: -165.138
-
-# remaining
 
 g:
   SMDD,RMDD: 0.0199558
