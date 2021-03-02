@@ -208,23 +208,29 @@ class Plotters(object):
 		
 		# read the data
 		data = read_body_data(filename)
-		data = data[:250]
+		# data = data[:250]
 
 		# process it
 		data_D, data_V = body_data_split_DV(data)
 		
 		# set up the figure object
-		fig = plt.figure()
 		arrbd_x = arr_bounds(data['x'])
 		arrbd_y = arr_bounds(data['y'])
+		
+		figsize = np.array([
+			arrbd_x[1] - arrbd_x[0],
+			arrbd_y[1] - arrbd_y[0],
+		])
+
+		figsize = figsize * 6 / min(figsize)
+		print(f'> figsize:\t{figsize}')
+		fig, ax = plt.subplots(1, 1, figsize = figsize)
 		
 		plt.xlim(*arrbd_x)
 		plt.ylim(*arrbd_y)
 
 		# fix the scaling
-		ax = plt.gca()
 		ax.axis('equal')
-
 
 		# draw the blocks
 		_plot_collision_boxes(ax, *read_coll_objs_file(collision_objs_file))
@@ -239,14 +245,15 @@ class Plotters(object):
 		# this function gets called on each frame
 		def anim_update(i, line_D, line_V):
 			print(f'\t{i}\t/\t{data.shape[0]}', end = '\r')
+			plt.title(f'frame\t{i}')
 			line_D.set_data(data_D[i]['x'], data_D[i]['y'])
 			line_V.set_data(data_V[i]['x'], data_V[i]['y'])
 
 			return line_D,line_V
 		
 		# set up the base worm
-		line_D, = plt.plot([], [], 'r-')
-		line_V, = plt.plot([], [], 'b-')
+		line_D, = ax.plot([], [], 'r-')
+		line_V, = ax.plot([], [], 'b-')
 
 		print('> finished setup!')
 

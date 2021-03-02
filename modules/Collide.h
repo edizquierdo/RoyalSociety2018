@@ -1,3 +1,6 @@
+#ifndef H_COLLIDE
+#define H_COLLIDE
+
 /* 
 collision code originally from:
 @article{Boyle_Berri_Cohen_2012, 
@@ -24,7 +27,7 @@ struct CollisionObject
 
 	double fvec_x;
 	double fvec_y;
-}
+};
 
 
 
@@ -132,3 +135,5 @@ struct CollisionObject
 		rval[three_i+2] = V_CoM[i][2] - ypval[three_i+2];
   	}
 */
+
+#endif

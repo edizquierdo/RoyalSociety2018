@@ -29,6 +29,9 @@
 
 #include "WormBody.h"
 #include <cfloat>
+#include <fstream>
+
+#include "Collide.h"
 
 using namespace std;
 
@@ -59,6 +62,52 @@ void InitializeBodyConstants(void)
 }
 
 
+
+
+void WormBody::load_CollObjs(void)
+{
+    // open file
+    ifstream objfile("data/collision_objs.tsv");
+    if (!objfile.is_open())
+    {
+        exit(EXIT_FAILURE);
+    }
+
+    // initialize temp variables
+    double bound_min_x;
+    double bound_min_y;
+
+    double bound_max_x;
+    double bound_max_y;
+
+    double fvec_x;
+    double fvec_y;
+
+    // loop
+    while(
+        objfile 
+        >> bound_min_x >> bound_min_y 
+        >> bound_max_x >> bound_max_y 
+        >> fvec_x >> fvec_y
+    ){
+        CollisionObject tempObj;
+        tempObj.bound_min_x = bound_min_x; 
+        tempObj.bound_min_y = bound_min_y;
+        tempObj.bound_max_x = bound_max_x; 
+        tempObj.bound_max_y = bound_max_y; 
+        tempObj.fvec_x = fvec_x; 
+        tempObj.fvec_y = fvec_y;
+        
+        // store data
+        CollObjs.push_back(tempObj);
+    }
+
+    // close file
+    objfile.close();
+}
+
+
+
 // Initialize the state of the body
 // Note that, for a DAE, initial states cannot be chosen arbitrarily. They must be consistent with the DAE.
 // Note also that the integration method SemiImplicitBackwardEulerDAEStep assumes that the initial dZ is 0
@@ -74,6 +123,8 @@ void WormBody::InitializeBodyState(void)
     UpdateKinematics();
     for (int i = 0; i < N_segments; i++)
         A_D_M[i] = A_V_M[i] = 0.0;
+    
+    load_CollObjs();
 }
 
 // YYY
