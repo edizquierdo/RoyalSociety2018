@@ -250,6 +250,8 @@ void WormBody::UpdateForces(int start, int end)
         f_V_D_y[i] = temp*uD_V_y[i];
         // wall collision forces 
         // included in passive diagonal forces for simplicity
+
+        // cout << f_D_D_x[i] << ", " << f_D_D_y[i] << ", " << f_V_D_x[i] << ", " << f_V_D_y[i] << endl;
         
         // loop over all collision boxes
         for ( CollisionObject obj : CollObjs )
@@ -262,9 +264,13 @@ void WormBody::UpdateForces(int start, int end)
                 && (Y(i) > obj.bound_min_y)
                 && (Y(i) < obj.bound_max_y)
             ){
-                cout << "detected collision " << endl;
+                // cout << "detected collision " << endl;
+
                 f_D_D_x[i] += obj.fvec_x;
                 f_D_D_y[i] += obj.fvec_y;
+
+                f_V_D_x[i] += obj.fvec_x;
+                f_V_D_y[i] += obj.fvec_y;
             }
 
             // CRIT: separate collisions for dorsal and ventral size
