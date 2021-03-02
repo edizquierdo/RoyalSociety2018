@@ -117,15 +117,15 @@ double EvaluationFunctionB(TVector<double> &v, RandomState &rs)
 
     #ifdef SPEEDOUTPUT
         ofstream fitfile;
-        fitfile.open("speed.dat");
+        fitfile.open("data/run/speed.dat");
     #endif
 
     #ifdef OUTPUT
         ofstream bodyfile, actfile, curvfile, paramsfile, voltagefile;
-        bodyfile.open("body.dat");
-        actfile.open("act.dat");
-        curvfile.open("curv.dat");
-        paramsfile.open("params.dat");
+        bodyfile.open("data/run/body.dat");
+        actfile.open("data/run/act.dat");
+        curvfile.open("data/run/curv.dat");
+        paramsfile.open("data/run/params.dat");
     #endif
 
     // Fitness

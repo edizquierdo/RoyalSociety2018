@@ -4,8 +4,21 @@ import matplotlib
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 
-def arr_bounds(arr):
-	return (np.amin(arr), np.amax(arr))
+WORM_RADIUS = 80e-6
+
+def arr_bounds(
+		arr, 
+		pad_frac : float = 0.0,
+	):
+	arr_min = np.amin(arr)
+	arr_max = np.amax(arr)
+	
+	arr_range = arr_max - arr_min
+
+	arr_min = arr_min - arr_range * pad_frac
+	arr_max = arr_max + arr_range * pad_frac
+
+	return (arr_min, arr_max)
 
 def read_body_data(filename):
 		data_raw = np.genfromtxt(filename, delimiter = ' ', dtype = None)
@@ -28,10 +41,47 @@ def read_body_data(filename):
 
 		return data
 
+def body_data_split_DV(data):
+	n_tstep = data.shape[0]
+	n_seg = data.shape[1]
+
+	worm_thickness = (
+		WORM_RADIUS / 2.0 * abs(
+			np.sin(np.arccos(
+				((np.linspace(0,n_seg,n_seg)) - n_seg / 2.0) 
+				/ ( n_seg / 2.0 + 0.2)
+			))
+		)
+	)
+
+	data_Dorsal = np.full(
+		shape = (n_tstep, n_seg),
+		fill_value = np.nan,
+		dtype = np.dtype([ ('x','f8'), ('y','f8')]),
+	)
+
+	data_Ventral = np.full(
+		shape = (n_tstep, n_seg),
+		fill_value = np.nan,
+		dtype = np.dtype([ ('x','f8'), ('y','f8')]),
+	)
+
+	for t in range(n_tstep):
+		dX = worm_thickness * np.cos(data[t]['phi'])
+		dY = worm_thickness * np.sin(data[t]['phi'])
+		data_Dorsal[t]['x'] = data[t]['x'] + dX
+		data_Dorsal[t]['y'] = data[t]['y'] + dY   
+		data_Ventral[t]['x'] = data[t]['x'] - dX   
+		data_Ventral[t]['y'] = data[t]['y'] - dY 
+
+	return (data_Dorsal, data_Ventral)
+
+
+
 
 class Plotters(object):
 	@staticmethod
-	def plot_head_pos(filename : str = '../body.dat'):
+	def plot_head_pos(filename : str = 'data/run/body.dat'):
 		head_x = []
 		head_y = []
 		
@@ -47,7 +97,7 @@ class Plotters(object):
 		plt.show()
 
 	@staticmethod
-	def plot_worm_anim(filename = '../body.dat'):
+	def plot_worm_anim_old(filename = 'data/run/body.dat'):
 		"""
 		https://towardsdatascience.com/animations-with-matplotlib-d96375c5442c
 		credit to the above for info on how to use FuncAnimation
@@ -104,7 +154,72 @@ class Plotters(object):
 		print('\n\n> done saving!')
 
 	@staticmethod
-	def plot_act(filename = '../act.dat'):
+	def plot_worm_anim(filename = 'data/run/body.dat'):
+		"""
+		https://towardsdatascience.com/animations-with-matplotlib-d96375c5442c
+		credit to the above for info on how to use FuncAnimation
+		"""
+		# idk what this does tbh
+		matplotlib.use("Agg")
+		
+		# read the data
+		data = read_body_data(filename)
+		# data = data[:250]
+
+		# process it
+		data_D, data_V = body_data_split_DV(data)
+		
+		# set up the figure object
+		fig = plt.figure()
+		arrbd_x = arr_bounds(data['x'])
+		arrbd_y = arr_bounds(data['y'])
+		
+		plt.xlim(*arrbd_x)
+		plt.ylim(*arrbd_y)
+
+		# fix the scaling
+		plt.axis('equal')
+
+		print('> positional bounds:\t', arr_bounds(data['x']), arr_bounds(data['y']))
+
+		
+		# Set up formatting for the movie files
+		Writer = animation.writers['ffmpeg']
+		writer = Writer(fps=30, metadata=dict(artist='Me'), bitrate=1800)
+
+		# this function gets called on each frame
+		def anim_update(i, line_D, line_V):
+			print(f'\t{i}\t/\t{data.shape[0]}', end = '\r')
+			line_D.set_data(data_D[i]['x'], data_D[i]['y'])
+			line_V.set_data(data_V[i]['x'], data_V[i]['y'])
+
+			return line_D,line_V
+		
+		# set up the base worm
+		line_D, = plt.plot([], [], 'r-')
+		line_V, = plt.plot([], [], 'b-')
+
+		print('> finished setup!')
+
+		# make the animation
+		line_ani = animation.FuncAnimation(
+			fig, 
+			anim_update,
+			fargs = (line_D, line_V),
+			frames = data.shape[0],
+			interval = 50, 
+			blit=True,
+		)
+
+		print('> animation created, saving...')
+
+		# save it
+		line_ani.save('data/worm.mp4', writer = writer)
+
+		print('\n\n> done saving!')
+
+	@staticmethod
+	def plot_act(filename = 'data/run/act.dat'):
 		data_raw = np.genfromtxt(filename, delimiter = ' ', dtype = np.float).T
 
 		print(data_raw.shape, data_raw.dtype)
@@ -114,7 +229,7 @@ class Plotters(object):
 
 		print(V.shape, V.dtype)
 
-		plt.ylim(-10.0, 50.0)
+		plt.ylim(-50.0, 50.0)
 
 		for vv in V:
 			plt.plot(T, vv)
