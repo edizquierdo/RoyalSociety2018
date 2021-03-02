@@ -221,12 +221,14 @@ class Plotters(object):
 
 		# set up the figure object
 		if arrbd_x is None:
-			arrbd_x = arr_bounds(data['x'])
+			# arrbd_x = arr_bounds(data['x'])
+			arrbd_x = (np.amin(blocks[:,:,0]), np.amax(blocks[:,:,0]))
 		else:
 			arrbd_x = tuple(arrbd_x)
 
 		if arrbd_y is None:
-			arrbd_y = arr_bounds(data['y'])
+			# arrbd_y = arr_bounds(data['y'])
+			arrbd_y = (np.amin(blocks[:,:,1]), np.amax(blocks[:,:,1]))
 		else:
 			arrbd_y = tuple(arrbd_y)
 		
@@ -251,7 +253,7 @@ class Plotters(object):
 
 		# fix the scaling
 		ax.axis('equal')
-		plt.axis('equal')
+		# plt.axis('equal')
 
 		# draw the blocks
 		_plot_collision_boxes(ax, blocks, vecs)

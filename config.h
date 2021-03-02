@@ -1,5 +1,5 @@
 // Integration parameters
-const double Duration = 20.0;           // Seconds
+const double Duration = 30.0;           // Seconds
 const double Transient = 10.0;          //
 const double StepSize = 0.01;
 const int N_curvs = 23;                 // Number of cuvature points

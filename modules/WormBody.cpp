@@ -248,45 +248,6 @@ void WormBody::UpdateForces(int start, int end)
         temp = kappa_D*(L_D0[i] - L_V_D[i]) - beta_D*dL_V_D[i];
         f_V_D_x[i] = temp*uD_V_x[i];
         f_V_D_y[i] = temp*uD_V_y[i];
-        // wall collision forces 
-        // included in passive diagonal forces for simplicity
-
-        // cout << f_D_D_x[i] << ", " << f_D_D_y[i] << ", " << f_V_D_x[i] << ", " << f_V_D_y[i] << endl;
-        
-        // loop over all collision boxes
-        for ( CollisionObject obj : CollObjs )
-        {
-            // cout << f_V_x[i] << ", " << f_V_y[i] << endl;
-            // dorsal elements
-            if (
-                (X(i) > obj.bound_min_x)
-                && (X(i) < obj.bound_max_x)
-                && (Y(i) > obj.bound_min_y)
-                && (Y(i) < obj.bound_max_y)
-            ){
-                // cout << "detected collision " << endl;
-
-                f_D_D_x[i] += obj.fvec_x;
-                f_D_D_y[i] += obj.fvec_y;
-
-                f_V_D_x[i] += obj.fvec_x;
-                f_V_D_y[i] += obj.fvec_y;
-            }
-
-            // CRIT: separate collisions for dorsal and ventral size
-            // ventral elements
-            // if (
-            //     (obj.bound_min_x < f_V_x[i])
-            //     && (f_V_x[i] < obj.bound_max_x)
-            //     && (obj.bound_min_y < f_V_y[i])
-            //     && (f_V_y[i] < obj.bound_max_y)
-
-            // ){
-            //     cout << "detected ventral collision " << endl;
-            //     f_V_D_x[i] += obj.fvec_x;
-            //     f_V_D_y[i] += obj.fvec_y;
-            // }
-        }
 
         // Lateral passive forces
         temp = L_L0[i] - L_D_L[i];
@@ -328,6 +289,45 @@ void WormBody::UpdateForces(int start, int end)
         f_D_y[N_segments] = f_V_D_y[N_segments-1] + f_D_L_y[N_segments-1] + f_D_M_y[N_segments-1];
         f_V_x[N_segments] = f_D_D_x[N_segments-1] + f_V_L_x[N_segments-1] + f_V_M_x[N_segments-1];
         f_V_y[N_segments] = f_D_D_y[N_segments-1] + f_V_L_y[N_segments-1] + f_V_M_y[N_segments-1];
+    }
+
+    // wall collision forces 
+    // OPTIMIZE: can do clever chunking by checking only a subset of points against each object
+    for (int i = start2; i < end2 - 1; i++) {
+        // loop over all collision boxes
+        for ( CollisionObject obj : CollObjs )
+        {
+            // cout << f_V_x[i] << ", " << f_V_y[i] << endl;
+            // dorsal elements
+            if (
+                (X(i) > obj.bound_min_x)
+                && (X(i) < obj.bound_max_x)
+                && (Y(i) > obj.bound_min_y)
+                && (Y(i) < obj.bound_max_y)
+            ){
+                // cout << "detected collision " << endl;
+
+                f_D_x[i] += obj.fvec_x;
+                f_D_y[i] += obj.fvec_y;
+
+                f_V_x[i] += obj.fvec_x;
+                f_V_x[i] += obj.fvec_y;
+            }
+
+            // CRIT: separate collisions for dorsal and ventral size
+            // ventral elements
+            // if (
+            //     (obj.bound_min_x < f_V_x[i])
+            //     && (f_V_x[i] < obj.bound_max_x)
+            //     && (obj.bound_min_y < f_V_y[i])
+            //     && (f_V_y[i] < obj.bound_max_y)
+
+            // ){
+            //     cout << "detected ventral collision " << endl;
+            //     f_V_D_x[i] += obj.fvec_x;
+            //     f_V_D_y[i] += obj.fvec_y;
+            // }
+        }
     }
 }
 
