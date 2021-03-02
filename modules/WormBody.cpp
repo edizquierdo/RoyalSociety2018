@@ -199,13 +199,25 @@ void WormBody::UpdateForces(int start, int end)
         f_V_D_y[i] = temp*uD_V_y[i];
         // wall collision forces 
         // included in passive diagonal forces for simplicity
+        
         #ifdef COLLIDE
             // loop over all collision boxes
             for ( CollisionObject obj : CollObjs )
             {
-                // TODO: need to get position here. unclear if `uL_D_x` is the correct variable
+                // dorsal elements
                 if (
-                    uL_D_x
+                    (obj.bound_min_x < f_D_x[i] < obj.bound_max_x)
+                    && (obj.bound_min_y < f_D_y[i] < obj.bound_max_y)
+                ){
+                    // TODO: force constant multiplier here? or when exporting vectors
+                    f_D_D_x[i] += obj.fvec_x;
+                    f_D_D_y[i] += obj.fvec_y;
+                }
+
+                // ventral elements
+                if (
+                    (obj.bound_min_x < f_V_x[i] < obj.bound_max_x)
+                    && (obj.bound_min_y < f_V_y[i] < obj.bound_max_y)
                 ){
                     // TODO: force constant multiplier here? or when exporting vectors
                     f_V_D_x[i] += obj.fvec_x;

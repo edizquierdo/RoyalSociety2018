@@ -2,7 +2,7 @@
 //#define SEED
 #define OUTPUT
 #define SPEEDOUTPUT
-// #define COLLIDE
+#define COLLIDE
 #define RAW_PHEN
 
 #include "main.h"

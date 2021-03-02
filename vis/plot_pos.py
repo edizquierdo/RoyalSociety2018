@@ -41,6 +41,47 @@ def read_body_data(filename):
 
 		return data
 
+def _plot_collision_boxes(ax, blocks, vecs):
+	from matplotlib.patches import Rectangle
+	from matplotlib.collections import PatchCollection
+
+	print(blocks)
+	print(vecs)
+
+	plot_boxes = []
+
+	for bl in blocks:
+		plot_boxes.append(Rectangle(
+			xy = bl[0], 
+			width = bl[1][0] - bl[0][0], 
+			height = bl[1][1] - bl[0][1],
+			fill = True,
+		))
+
+	pc = PatchCollection(
+		plot_boxes, 
+		facecolor = 'red', 
+		alpha = 0.5,
+		edgecolor = 'red',
+	)
+
+	ax.add_collection(pc)
+
+def read_coll_objs_file(objs_file : str):
+	blocks = []
+	vecs = []
+	
+	with open(objs_file, 'r') as fin:
+		for row in fin:
+			row_lst = row.strip().split()
+			row_lst = [ float(x) for x in row_lst ]
+
+			blocks.append([ row_lst[0:2], row_lst[2:4] ])
+			vecs.append(row_lst[4:])
+
+	return (np.array(blocks), np.array(vecs))
+
+
 def body_data_split_DV(data):
 	n_tstep = data.shape[0]
 	n_seg = data.shape[1]
@@ -154,7 +195,10 @@ class Plotters(object):
 		print('\n\n> done saving!')
 
 	@staticmethod
-	def plot_worm_anim(filename = 'data/run/body.dat'):
+	def plot_worm_anim(
+			filename = 'data/run/body.dat',
+			collision_objs_file = 'data/collision_objs.tsv',
+		):
 		"""
 		https://towardsdatascience.com/animations-with-matplotlib-d96375c5442c
 		credit to the above for info on how to use FuncAnimation
@@ -164,7 +208,7 @@ class Plotters(object):
 		
 		# read the data
 		data = read_body_data(filename)
-		# data = data[:250]
+		data = data[:250]
 
 		# process it
 		data_D, data_V = body_data_split_DV(data)
@@ -178,7 +222,12 @@ class Plotters(object):
 		plt.ylim(*arrbd_y)
 
 		# fix the scaling
-		plt.axis('equal')
+		ax = plt.gca()
+		ax.axis('equal')
+
+
+		# draw the blocks
+		_plot_collision_boxes(ax, *read_coll_objs_file(collision_objs_file))
 
 		print('> positional bounds:\t', arr_bounds(data['x']), arr_bounds(data['y']))
 
