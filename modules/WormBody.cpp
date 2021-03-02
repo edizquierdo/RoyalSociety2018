@@ -251,31 +251,36 @@ void WormBody::UpdateForces(int start, int end)
         // wall collision forces 
         // included in passive diagonal forces for simplicity
         
-        #ifdef COLLIDE
-            // loop over all collision boxes
-            for ( CollisionObject obj : CollObjs )
-            {
-                // dorsal elements
-                if (
-                    (obj.bound_min_x < f_D_x[i] < obj.bound_max_x)
-                    && (obj.bound_min_y < f_D_y[i] < obj.bound_max_y)
-                ){
-                    // TODO: force constant multiplier here? or when exporting vectors
-                    f_D_D_x[i] += obj.fvec_x;
-                    f_D_D_y[i] += obj.fvec_y;
-                }
-
-                // ventral elements
-                if (
-                    (obj.bound_min_x < f_V_x[i] < obj.bound_max_x)
-                    && (obj.bound_min_y < f_V_y[i] < obj.bound_max_y)
-                ){
-                    // TODO: force constant multiplier here? or when exporting vectors
-                    f_V_D_x[i] += obj.fvec_x;
-                    f_V_D_y[i] += obj.fvec_y;
-                }
+        // loop over all collision boxes
+        for ( CollisionObject obj : CollObjs )
+        {
+            // cout << f_V_x[i] << ", " << f_V_y[i] << endl;
+            // dorsal elements
+            if (
+                (X(i) > obj.bound_min_x)
+                && (X(i) < obj.bound_max_x)
+                && (Y(i) > obj.bound_min_y)
+                && (Y(i) < obj.bound_max_y)
+            ){
+                cout << "detected collision " << endl;
+                f_D_D_x[i] += obj.fvec_x;
+                f_D_D_y[i] += obj.fvec_y;
             }
-        #endif
+
+            // CRIT: separate collisions for dorsal and ventral size
+            // ventral elements
+            // if (
+            //     (obj.bound_min_x < f_V_x[i])
+            //     && (f_V_x[i] < obj.bound_max_x)
+            //     && (obj.bound_min_y < f_V_y[i])
+            //     && (f_V_y[i] < obj.bound_max_y)
+
+            // ){
+            //     cout << "detected ventral collision " << endl;
+            //     f_V_D_x[i] += obj.fvec_x;
+            //     f_V_D_y[i] += obj.fvec_y;
+            // }
+        }
 
         // Lateral passive forces
         temp = L_L0[i] - L_D_L[i];

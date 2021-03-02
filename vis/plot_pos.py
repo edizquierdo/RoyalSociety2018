@@ -198,6 +198,7 @@ class Plotters(object):
 	def plot_worm_anim(
 			filename = 'data/run/body.dat',
 			collision_objs_file = 'data/collision_objs.tsv',
+			out_file = 'data/worm.mp4',
 		):
 		"""
 		https://towardsdatascience.com/animations-with-matplotlib-d96375c5442c
@@ -267,10 +268,10 @@ class Plotters(object):
 			blit=True,
 		)
 
-		print('> animation created, saving...')
+		print(f'> animation created, saving to file `{out_file}`')
 
 		# save it
-		line_ani.save('data/worm.mp4', writer = writer)
+		line_ani.save(out_file, writer = writer)
 
 		print('\n\n> done saving!')
 
