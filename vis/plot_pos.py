@@ -133,7 +133,7 @@ class Plotters(object):
 				head_y.append(float(xy_temp[1]))
 
 		print(len(head_x), len(head_y))
-
+		plt.axis('equal')
 		plt.plot(head_x, head_y)
 		plt.show()
 
@@ -199,6 +199,8 @@ class Plotters(object):
 			filename = 'data/run/body.dat',
 			collision_objs_file = 'data/collision_objs.tsv',
 			out_file = 'data/worm.mp4',
+			arrbd_x = None,
+			arrbd_y = None,
 		):
 		"""
 		https://towardsdatascience.com/animations-with-matplotlib-d96375c5442c
@@ -214,30 +216,45 @@ class Plotters(object):
 		# process it
 		data_D, data_V = body_data_split_DV(data)
 		
+
+		blocks,vecs = read_coll_objs_file(collision_objs_file)
+
 		# set up the figure object
-		arrbd_x = arr_bounds(data['x'])
-		arrbd_y = arr_bounds(data['y'])
+		if arrbd_x is None:
+			arrbd_x = arr_bounds(data['x'])
+		else:
+			arrbd_x = tuple(arrbd_x)
+
+		if arrbd_y is None:
+			arrbd_y = arr_bounds(data['y'])
+		else:
+			arrbd_y = tuple(arrbd_y)
 		
+		print('> positional bounds:\t', arrbd_x, arrbd_y)
+	
 		figsize = np.array([
 			arrbd_x[1] - arrbd_x[0],
 			arrbd_y[1] - arrbd_y[0],
 		])
-
-		figsize = figsize * 6 / min(figsize)
+		
+		# print(f'> figsize:\t{figsize}')
+		figsize = figsize * 10 / max(figsize)
 		print(f'> figsize:\t{figsize}')
 		fig, ax = plt.subplots(1, 1, figsize = figsize)
+		# fig, ax = plt.subplots(1, 1)
 		
-		plt.xlim(*arrbd_x)
-		plt.ylim(*arrbd_y)
+		# ax.set_xlim(*arrbd_x)
+		# ax.set_ylim(*arrbd_y)
+
+		# plt.xlim(*arrbd_x)
+		# plt.ylim(*arrbd_y)
 
 		# fix the scaling
 		ax.axis('equal')
+		plt.axis('equal')
 
 		# draw the blocks
-		_plot_collision_boxes(ax, *read_coll_objs_file(collision_objs_file))
-
-		print('> positional bounds:\t', arr_bounds(data['x']), arr_bounds(data['y']))
-
+		_plot_collision_boxes(ax, blocks, vecs)
 		
 		# Set up formatting for the movie files
 		Writer = animation.writers['ffmpeg']
@@ -246,7 +263,7 @@ class Plotters(object):
 		# this function gets called on each frame
 		def anim_update(i, line_D, line_V):
 			print(f'\t{i}\t/\t{data.shape[0]}', end = '\r')
-			plt.title(f'frame\t{i}')
+			plt.title(f'frame   {i}')
 			line_D.set_data(data_D[i]['x'], data_D[i]['y'])
 			line_V.set_data(data_V[i]['x'], data_V[i]['y'])
 
