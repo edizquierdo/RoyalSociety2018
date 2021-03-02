@@ -25,3 +25,5 @@ demorun.o: modules/Worm.h modules/WormBody.h modules/StretchReceptor.h modules/M
 	g++ $(GCCFLAGS) demorun.cpp
 clean:
 	rm *.o *.exe
+wipedat:
+	rm *.dat

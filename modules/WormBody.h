@@ -23,8 +23,6 @@
 #include <vector>
 #include <cmath>
 
-// REVIEW: remove this definition later
-#define COLLISION
 
 #ifdef COLLISION
     #include "Collide.h"
@@ -188,7 +186,7 @@ private:
             >> bound_max_x >> bound_max_y 
             >> fvec_x >> fvec_y
         ){
-            CollisionObject tempObj();
+            CollisionObject tempObj;
             tempObj.bound_min_x = bound_min_x; 
             tempObj.bound_min_y = bound_min_y;
             tempObj.bound_max_x = bound_max_x; 

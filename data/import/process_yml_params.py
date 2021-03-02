@@ -31,6 +31,7 @@ class process_yaml(object):
 			data = yaml.safe_load(fin.read())
 		
 		output = [
+			float('nan'),
 			# // --------------------------------
 			# // Parameters for the Ventral Nerve Cord Unit
 			# // --------------------------------

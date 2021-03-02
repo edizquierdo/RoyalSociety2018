@@ -17,9 +17,10 @@
 
 // #define EVOLVE
 // #define PRINTTOFILE
-//#define SEED
-//#define OUTPUT
-//#define SPEEDOUTPUT
+// #define SEED
+// #define OUTPUT
+// #define SPEEDOUTPUT
+// #define MAP_PHEN
 
 using namespace std;
 
@@ -135,11 +136,14 @@ double EvaluationFunctionB(TVector<double> &v, RandomState &rs)
     TVector<double> antpostcurv(1, 2);
     antpostcurv.FillContents(0.0);
 
-    // Genotype-Phenotype Mapping
-    TVector<double> phenotype(1, VectSize);
-    GenPhenMapping(v, phenotype);
-
-    Worm w(phenotype, 0);
+    #ifdef RAW_PHEN
+        Worm w(v, 0);
+    #else
+        // Genotype-Phenotype Mapping
+        TVector<double> phenotype(1, VectSize);
+        GenPhenMapping(v, phenotype);
+        Worm w(phenotype, 0);
+    #endif
 
     #ifdef OUTPUT
         w.DumpParams(paramsfile);

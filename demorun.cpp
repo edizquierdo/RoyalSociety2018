@@ -2,7 +2,8 @@
 //#define SEED
 #define OUTPUT
 #define SPEEDOUTPUT
-#define COLLIDE
+// #define COLLIDE
+#define RAW_PHEN
 
 #include "main.h"
 
@@ -20,7 +21,7 @@ int main (int argc, const char* argv[])
 
     ifstream BestIndividualFile;
     TVector<double> bestVector(1, VectSize);
-    BestIndividualFile.open("best.gen.dat");
+    BestIndividualFile.open("data/best.gen.dat");
     BestIndividualFile >> bestVector;
 
     EvaluationFunctionB(bestVector, rs);

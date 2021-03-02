@@ -199,7 +199,6 @@ void WormBody::UpdateForces(int start, int end)
         f_V_D_y[i] = temp*uD_V_y[i];
         // wall collision forces 
         // included in passive diagonal forces for simplicity
-        #define COLLIDE
         #ifdef COLLIDE
             // loop over all collision boxes
             for ( CollisionObject obj : CollObjs )
