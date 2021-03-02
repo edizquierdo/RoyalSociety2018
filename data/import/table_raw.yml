@@ -1,0 +1,53 @@
+# Table 1: Model parameters for the evolved solution that was analyzed in detail.
+
+tau: 
+  SMD: 0.500646 # τ SMDD , τ SMDV
+  RMD: 0.502018 # τ RMDD , τ RMDV
+  B: 0.502865 # τ DB , τ VB
+  D: 1.67861 # τ VD , τ VD
+
+theta:
+  SMD: 6.27095 # θ SMDD , θ SMDV
+  RMD: -3.65014 # θ RMDD , θ RMDV
+  B: 4.80699 # θ DB , θ VB
+  D: -2.94785 # θ DD , θ VD
+
+w:
+  # self connections
+  self_SMD: -14.9121 # w SMDD,SMDD , w SMDV,SMDV
+  self_RMD: 6.62512 # w RMDD,RMDD , w RMDV,RMDV
+  self_B: -14.9544 # w DB,DB , w VB,VB 
+  self_D:  1.13632 # w DD,DD , w VD,VD
+
+  # group connections
+  cross_SMD: -11.2755 # w SMDD,SMDV , w SMDV,SMDD
+  SMD_to_RMD: 14.9933 # w SMDD,RMDV , w SMDV,RMDD
+  cross_RMD: -11.6075 # w RMDD,RMDV , w RMDV,RMDD
+  B_to_D: -9.79669 # w DB,DD , w VB,VD
+
+  # invidivual/special connections
+  DB_VD: 12.3531 # w DB,VD
+  VB_DD: 6.17657 # w VB,DD
+  DD_VD: 1.66374 # w DD,VD 
+
+  # NMJ
+  NMJ:
+    SMD: 0.000371977 # w NMJ,SMDD , w NMJ,SMDV 
+    RMD: 1.00000 # w NMJ,RMDD , w NMJ,RMDV
+    B: 1.00000 # w NMJ,DB , w NMJ,VB
+    D: -0.00105857 # w NMJ,DD , w NMJ,VD
+
+g:
+  SMD_to_RMD: 0.0199558 # g SMDD,RMDD , g SMDV,RMDV
+  RMD_across: 1.51095 # g RMDD,RMDV
+  B_fwd: 0.569164 # g DB i ,DB i+1 , g VB i ,VB i+1
+  D_fwd: 0.994941 # g DD i ,DD i+1 , g VD i ,VD i+1
+
+  B_across: 1.10313 # g VB i ,DB i+1
+  D_across: 1.46108 # g DD,VD
+
+
+r:
+  SMD: -120.535 # r SMDD , r SMDV
+  B: -165.138 # r DB , r VB 
+
