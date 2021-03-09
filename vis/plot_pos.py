@@ -125,7 +125,7 @@ def body_data_split_DV(data):
 
 class Plotters(object):
 	@staticmethod
-	def plot_head_pos(filename : str = 'data/run/body.dat'):
+	def plot_head_pos(filename : str = 'data/run/body.dat', collision_objs_file : str = 'data/collision_objs.tsv'):
 		head_x = []
 		head_y = []
 		
@@ -134,6 +134,12 @@ class Plotters(object):
 				xy_temp = line.split()[1:3]
 				head_x.append(float(xy_temp[0]))
 				head_y.append(float(xy_temp[1]))
+
+		blocks,vecs = read_coll_objs_file(collision_objs_file)
+		
+		
+		fig, ax = plt.subplots(1,1)
+		_plot_collision_boxes(ax, blocks, vecs)
 
 		print(len(head_x), len(head_y))
 		plt.axis('equal')
