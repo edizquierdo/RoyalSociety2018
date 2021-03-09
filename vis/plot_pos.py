@@ -1,5 +1,8 @@
+from typing import *
+
 import numpy as np
 import numpy.lib.recfunctions as rfn
+
 import matplotlib
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
@@ -196,11 +199,13 @@ class Plotters(object):
 
 	@staticmethod
 	def plot_worm_anim(
-			filename = 'data/run/body.dat',
-			collision_objs_file = 'data/collision_objs.tsv',
-			out_file = 'data/worm.mp4',
+			filename : str = 'data/run/body.dat',
+			collision_objs_file : str = 'data/collision_objs.tsv',
+			out_file : str = 'data/worm.mp4',
 			arrbd_x = None,
 			arrbd_y = None,
+			limit_frames : Optional[int] = None,
+			figsize_scalar : float = 10.0,
 		):
 		"""
 		https://towardsdatascience.com/animations-with-matplotlib-d96375c5442c
@@ -211,7 +216,8 @@ class Plotters(object):
 		
 		# read the data
 		data = read_body_data(filename)
-		# data = data[:250]
+		if limit_frames is not None:
+			data = data[:limit_frames]
 
 		# process it
 		data_D, data_V = body_data_split_DV(data)
@@ -240,7 +246,7 @@ class Plotters(object):
 		])
 		
 		# print(f'> figsize:\t{figsize}')
-		figsize = figsize * 10 / max(figsize)
+		figsize = figsize * figsize_scalar / max(figsize)
 		print(f'> figsize:\t{figsize}')
 		fig, ax = plt.subplots(1, 1, figsize = figsize)
 		# fig, ax = plt.subplots(1, 1)
@@ -293,6 +299,8 @@ class Plotters(object):
 		line_ani.save(out_file, writer = writer)
 
 		print('\n\n> done saving!')
+
+
 
 	@staticmethod
 	def plot_act(filename = 'data/run/act.dat'):

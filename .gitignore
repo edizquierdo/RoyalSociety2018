@@ -1,3 +1,4 @@
 *.o
 *.exe
 *.mp4
+data/run/**
