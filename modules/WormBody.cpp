@@ -322,51 +322,65 @@ void WormBody::UpdateForces(int start, int end)
                 && (Y(N_rods * 2 / 3) < obj.bound_max_y + radius_check)
             )
         ){
+            // init vars for collision checking
+            double x,y,phi;
+            double p_D_x,p_D_y,p_V_x,p_V_y;
+
             // if yes, check each rod for collisions
             for (int i = start2; i < end2 - 1; i++)
             {
+                x = X(i), y = Y(i), phi = Phi(i);
 
+                // cout << x << ", " << y << ", " << phi << endl;
 
-                // int i3 = 3*i;
-                
-                // double x = Z[i3], y = Z[i3+1], phi = Z[i3+2];
-                // sinPhi[i] = sin(phi);
-                // cosPhi[i] = cos(phi);
-                // p_D_x[i] = x + R[i]*cosPhi[i];
-                // p_D_y[i] = y + R[i]*sinPhi[i];
-                // p_V_x[i] = x - R[i]*cosPhi[i];
-                // p_V_y[i] = y - R[i]*sinPhi[i];
+                // compute rod endpoints
+                p_D_x = x + R[i]*cos(phi);
+                p_D_y = y + R[i]*sin(phi);
+                p_V_x = x - R[i]*cos(phi);
+                p_V_y = y - R[i]*sin(phi);
 
-                // cout << f_V_x[i] << ", " << f_V_y[i] << endl;
-                // dorsal elements
+                // forces on dorsal elements
                 if (
-                    (X(i) > obj.bound_min_x)
-                    && (X(i) < obj.bound_max_x)
-                    && (Y(i) > obj.bound_min_y)
-                    && (Y(i) < obj.bound_max_y)
+                    (
+                        (p_D_x > obj.bound_min_x)
+                        && (p_D_x < obj.bound_max_x)
+                        && (p_D_y > obj.bound_min_y)
+                        && (p_D_y < obj.bound_max_y)
+                    ) || (
+                        (p_V_x > obj.bound_min_x)
+                        && (p_V_x < obj.bound_max_x)
+                        && (p_V_y > obj.bound_min_y)
+                        && (p_V_y < obj.bound_max_y)
+                    )
                 ){
-                    // cout << "detected collision " << endl;
-
                     f_D_x[i] += obj.fvec_x;
                     f_D_y[i] += obj.fvec_y;
-
                     f_V_x[i] += obj.fvec_x;
                     f_V_x[i] += obj.fvec_y;
                 }
 
-                // CRIT: separate collisions for dorsal and ventral size
-                // ventral elements
+                // REVIEW: forces not working when split up
+                // // forces on dorsal elements
                 // if (
-                //     (obj.bound_min_x < f_V_x[i])
-                //     && (f_V_x[i] < obj.bound_max_x)
-                //     && (obj.bound_min_y < f_V_y[i])
-                //     && (f_V_y[i] < obj.bound_max_y)
-
+                //     (p_D_x > obj.bound_min_x)
+                //     && (p_D_x < obj.bound_max_x)
+                //     && (p_D_y > obj.bound_min_y)
+                //     && (p_D_y < obj.bound_max_y)
                 // ){
-                //     cout << "detected ventral collision " << endl;
-                //     f_V_D_x[i] += obj.fvec_x;
-                //     f_V_D_y[i] += obj.fvec_y;
+                //     f_D_x[i] += obj.fvec_x;
+                //     f_D_y[i] += obj.fvec_y;
                 // }
+
+                // // forces on ventral elements
+                // if (
+                //     (p_V_x > obj.bound_min_x)
+                //     && (p_V_x < obj.bound_max_x)
+                //     && (p_V_y > obj.bound_min_y)
+                //     && (p_V_y < obj.bound_max_y)
+                // ){
+                //     f_V_x[i] += obj.fvec_x;
+                //     f_V_x[i] += obj.fvec_y;
+                // }    
             }
         }
     }

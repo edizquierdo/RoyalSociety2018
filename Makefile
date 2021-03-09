@@ -1,5 +1,6 @@
 # GCCFLAGS = -pthread -c -O3 -flto
-GCCFLAGS = -std=c++11 -c -O3 -flto
+# GCCFLAGS = -std=c++11 -c -O3 -flto
+GCCFLAGS = -std=c++11 -c -flto
 
 evolve: evolve.o Worm.o WormBody.o NervousSystem.o StretchReceptor.o Muscles.o TSearch.o random.o
 	g++ -o evolve evolve.o Worm.o WormBody.o NervousSystem.o StretchReceptor.o Muscles.o TSearch.o random.o -lpthread
