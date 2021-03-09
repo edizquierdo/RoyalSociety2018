@@ -44,6 +44,9 @@ double L_L0[N_rods];                  // Rest length of each lateral element in 
 double L_min[N_rods];                 // Minimal length of each lateral muscle in m
 double L_L0_minus_L_min[N_rods];      // Precomputed difference between the above two vectors
 
+// REVIEW: this parameter can be tuned
+double radius_check;
+
 
 // Initialize various vectors of per rod body constants
 // This only needs to be done ONCE, not once per instance
@@ -117,6 +120,11 @@ void WormBody::InitializeBodyState(void)
     t = 0.0;
     for (int i = 0; i < N_rods; i++) {
         int i3 = 3*i;
+        // vertical, facing up
+        // Z[i3] = 0.0; Z[i3+1] = -i*L_seg; Z[i3+2] = 0.0;
+        // dZ[i3] = dZ[i3+1] = dZ[i3+2] = 0.0;
+
+        // Horizontal, facing left
         Z[i3] = i*L_seg; Z[i3+1] = 0.0; Z[i3+2] = M_PI/2;
         dZ[i3] = dZ[i3+1] = dZ[i3+2] = 0.0;
     }
@@ -125,6 +133,8 @@ void WormBody::InitializeBodyState(void)
         A_D_M[i] = A_V_M[i] = 0.0;
     
     load_CollObjs();
+
+    radius_check = L_seg * (double) N_rods / 2;
 }
 
 // YYY
@@ -293,40 +303,71 @@ void WormBody::UpdateForces(int start, int end)
 
     // wall collision forces 
     // OPTIMIZE: can do clever chunking by checking only a subset of points against each object
-    for (int i = start2; i < end2 - 1; i++) {
-        // loop over all collision boxes
-        for ( CollisionObject obj : CollObjs )
-        {
-            // cout << f_V_x[i] << ", " << f_V_y[i] << endl;
-            // dorsal elements
-            if (
-                (X(i) > obj.bound_min_x)
-                && (X(i) < obj.bound_max_x)
-                && (Y(i) > obj.bound_min_y)
-                && (Y(i) < obj.bound_max_y)
-            ){
-                // cout << "detected collision " << endl;
+    // loop over all collision boxes
+    for ( CollisionObject obj : CollObjs )
+    {
+        
+        // check anywhere near a collision box
+        if (
+            (
+                (X(N_rods / 3) > obj.bound_min_x - radius_check)
+                && (X(N_rods / 3) < obj.bound_max_x + radius_check)
+                && (Y(N_rods / 3) > obj.bound_min_y - radius_check)
+                && (Y(N_rods / 3) < obj.bound_max_y + radius_check)
+            )
+            || (
+                (X(N_rods * 2 / 3) > obj.bound_min_x - radius_check)
+                && (X(N_rods * 2 / 3) < obj.bound_max_x + radius_check)
+                && (Y(N_rods * 2 / 3) > obj.bound_min_y - radius_check)
+                && (Y(N_rods * 2 / 3) < obj.bound_max_y + radius_check)
+            )
+        ){
+            // if yes, check each rod for collisions
+            for (int i = start2; i < end2 - 1; i++)
+            {
 
-                f_D_x[i] += obj.fvec_x;
-                f_D_y[i] += obj.fvec_y;
 
-                f_V_x[i] += obj.fvec_x;
-                f_V_x[i] += obj.fvec_y;
+                // int i3 = 3*i;
+                
+                // double x = Z[i3], y = Z[i3+1], phi = Z[i3+2];
+                // sinPhi[i] = sin(phi);
+                // cosPhi[i] = cos(phi);
+                // p_D_x[i] = x + R[i]*cosPhi[i];
+                // p_D_y[i] = y + R[i]*sinPhi[i];
+                // p_V_x[i] = x - R[i]*cosPhi[i];
+                // p_V_y[i] = y - R[i]*sinPhi[i];
+
+                // cout << f_V_x[i] << ", " << f_V_y[i] << endl;
+                // dorsal elements
+                if (
+                    (X(i) > obj.bound_min_x)
+                    && (X(i) < obj.bound_max_x)
+                    && (Y(i) > obj.bound_min_y)
+                    && (Y(i) < obj.bound_max_y)
+                ){
+                    // cout << "detected collision " << endl;
+
+                    f_D_x[i] += obj.fvec_x;
+                    f_D_y[i] += obj.fvec_y;
+
+                    f_V_x[i] += obj.fvec_x;
+                    f_V_x[i] += obj.fvec_y;
+                }
+
+                // CRIT: separate collisions for dorsal and ventral size
+                // ventral elements
+                // if (
+                //     (obj.bound_min_x < f_V_x[i])
+                //     && (f_V_x[i] < obj.bound_max_x)
+                //     && (obj.bound_min_y < f_V_y[i])
+                //     && (f_V_y[i] < obj.bound_max_y)
+
+                // ){
+                //     cout << "detected ventral collision " << endl;
+                //     f_V_D_x[i] += obj.fvec_x;
+                //     f_V_D_y[i] += obj.fvec_y;
+                // }
             }
-
-            // CRIT: separate collisions for dorsal and ventral size
-            // ventral elements
-            // if (
-            //     (obj.bound_min_x < f_V_x[i])
-            //     && (f_V_x[i] < obj.bound_max_x)
-            //     && (obj.bound_min_y < f_V_y[i])
-            //     && (f_V_y[i] < obj.bound_max_y)
-
-            // ){
-            //     cout << "detected ventral collision " << endl;
-            //     f_V_D_x[i] += obj.fvec_x;
-            //     f_V_D_y[i] += obj.fvec_y;
-            // }
         }
     }
 }
