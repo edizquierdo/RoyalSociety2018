@@ -1,3 +1,4 @@
+import os
 from typing import *
 
 import numpy as np
@@ -48,8 +49,8 @@ def _plot_collision_boxes(ax, blocks, vecs):
 	from matplotlib.patches import Rectangle
 	from matplotlib.collections import PatchCollection
 
-	print(blocks)
-	print(vecs)
+	# print(blocks)
+	# print(vecs)
 
 	plot_boxes = []
 
@@ -125,7 +126,13 @@ def body_data_split_DV(data):
 
 class Plotters(object):
 	@staticmethod
-	def head_pos(filename : str = 'data/run/body.dat', collision_objs_file : str = 'data/collision_objs.tsv'):
+	def head_pos(
+			filename : str = 'data/run/body.dat', 
+			collision_objs_file : Optional[str] = 'data/collision_objs.tsv',
+			show = True,
+			figax_objs = None,
+			label = None,
+		):
 		head_x = []
 		head_y = []
 		
@@ -135,15 +142,69 @@ class Plotters(object):
 				head_x.append(float(xy_temp[0]))
 				head_y.append(float(xy_temp[1]))
 
-		blocks,vecs = read_coll_objs_file(collision_objs_file)
 		
-		
-		fig, ax = plt.subplots(1,1)
-		_plot_collision_boxes(ax, blocks, vecs)
+		if figax_objs is not None:
+			fig, ax = figax_objs
+		else:
+			fig, ax = plt.subplots(1,1)
 
-		print(len(head_x), len(head_y))
+		if collision_objs_file is not None:
+			blocks,vecs = read_coll_objs_file(collision_objs_file)
+			_plot_collision_boxes(ax, blocks, vecs)
+
+		# print(len(head_x), len(head_y))
 		plt.axis('equal')
-		plt.plot(head_x, head_y)
+		plt.plot(head_x, head_y, label = label)
+		
+		if show:
+			plt.legend()
+			plt.show()
+
+	@staticmethod
+	def multi_path(
+			fname_rootdir : str = 'data/run/Tmaze/',
+			collision_objs_file : Optional[str] = None,
+		):
+		
+		# read from root dir if no file given
+		if collision_objs_file is None:
+			# get the file
+			collision_objs_file = fname_rootdir + 'collision_objs.tsv'
+			# if not a valid file, reset to none
+			if not os.path.isfile(collision_objs_file):
+				collision_objs_file = None
+
+		# get the list of body.dat files
+		fname_list = [
+			fname_rootdir + x + '/body.dat'
+			for x in os.listdir(fname_rootdir) if os.path.isdir(fname_rootdir + x)
+		]
+
+		# trim nonexistent files
+		fname_list = [
+			x
+			for x in fname_list
+			if os.path.isfile(x)
+		]
+
+		# figure on which everything will be plotted
+		fig, ax = plt.subplots(1,1)
+
+		# plot objects, if any
+		if collision_objs_file is not None:
+			blocks,vecs = read_coll_objs_file(collision_objs_file)
+			_plot_collision_boxes(ax, blocks, vecs)
+
+		# plot all figs
+		for fname in fname_list:
+			Plotters.head_pos(
+				fname, 
+				show = False, 
+				figax_objs = (fig,ax),
+				label = fname.split('/')[-2],
+			)
+
+		plt.legend(loc = 'lower left')
 		plt.show()
 
 	@staticmethod
