@@ -115,8 +115,9 @@ public:
     // YYY
     double RestingLength(int i);
 
-    void load_CollObjs(void);
     vector<CollisionObject> CollObjs;
+    void load_CollObjs(void) { CollObjs = load_objects(); }
+
     
     // Control
     void InitializeBodyState(void);

@@ -1,5 +1,29 @@
-#ifndef H_COLLIDE
-#define H_COLLIDE
+#ifndef COLLIDE_H
+#define COLLIDE_H
+
+#include <vector>
+#include <fstream>
+// #include <stdlib.h> 
+// #include <cmath>
+
+#define COLLIDE_FILE "data/collision_objs.tsv"
+
+
+struct CollisionObject
+{
+	double bound_min_x;
+	double bound_min_y;
+
+	double bound_max_x;
+	double bound_max_y;
+
+	double fvec_x;
+	double fvec_y;
+};
+
+std::vector<CollisionObject> load_objects();
+
+#endif
 
 /* 
 collision code originally from:
@@ -15,21 +39,6 @@ collision code originally from:
 	year={2012}
 modified by github.com/mivanit
 } */
-
-
-struct CollisionObject
-{
-	double bound_min_x;
-	double bound_min_y;
-
-	double bound_max_x;
-	double bound_max_y;
-
-	double fvec_x;
-	double fvec_y;
-};
-
-
 
 
 /*
@@ -136,4 +145,3 @@ struct CollisionObject
   	}
 */
 
-#endif
