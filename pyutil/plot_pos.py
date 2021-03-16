@@ -1,4 +1,7 @@
+import sys
 from typing import *
+
+from math import degrees
 
 import numpy as np
 import numpy.lib.recfunctions as rfn
@@ -6,6 +9,9 @@ import numpy.lib.recfunctions as rfn
 import matplotlib
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
+
+
+from collision_object import *
 
 WORM_RADIUS = 80e-6
 
@@ -69,6 +75,41 @@ def _plot_collision_boxes(ax, blocks, vecs):
 	)
 
 	ax.add_collection(pc)
+
+def _plot_collobjs(ax, collobjs):
+	from matplotlib.patches import Rectangle,Wedge
+	from matplotlib.collections import PatchCollection
+
+	plot_objs = []
+
+	for obj in collobjs:
+		if obj.coll_type == CollisionType.Box_Ax:
+			plot_objs.append(Rectangle(
+				xy = [obj['bound_min_x'], obj['bound_min_y']], 
+				width = obj['bound_max_x'] - obj['bound_min_x'], 
+				height = obj['bound_max_y'] - obj['bound_min_y'],
+				fill = True,
+			))
+		elif obj.coll_type == CollisionType.Disc:
+			plot_objs.append(Wedge(
+				center = [ obj['centerpos_x'], obj['centerpos_y'] ],
+				r = obj['radius_outer'],
+				theta1 = degrees(obj['angle_min']),
+				theta2 = degrees(obj['angle_max']),
+				width = obj['radius_outer'] - obj['radius_inner'],
+
+				fill = True,
+			))
+
+	pc = PatchCollection(
+		plot_objs, 
+		facecolor = 'red', 
+		alpha = 0.5,
+		edgecolor = 'red',
+	)
+
+	ax.add_collection(pc)
+
 
 def read_coll_objs_file(objs_file : str):
 	blocks = []
@@ -135,11 +176,8 @@ class Plotters(object):
 				head_x.append(float(xy_temp[0]))
 				head_y.append(float(xy_temp[1]))
 
-		blocks,vecs = read_coll_objs_file(collision_objs_file)
-		
-		
 		fig, ax = plt.subplots(1,1)
-		_plot_collision_boxes(ax, blocks, vecs)
+		_plot_collobjs(ax, read_collobjs_tsv(collision_objs_file))
 
 		print(len(head_x), len(head_y))
 		plt.axis('equal')
@@ -172,18 +210,19 @@ class Plotters(object):
 		data_D, data_V = body_data_split_DV(data)
 		
 
-		blocks,vecs = read_coll_objs_file(collision_objs_file)
+		collobjs = read_collobjs_tsv(collision_objs_file)
+		collobjs_bounds = get_bounds(collobjs)
 
 		# set up the figure object
 		if arrbd_x is None:
 			# arrbd_x = arr_bounds(data['x'])
-			arrbd_x = (np.amin(blocks[:,:,0]), np.amax(blocks[:,:,0]))
+			arrbd_x = (collobjs_bounds['bound_min_x'], collobjs_bounds['bound_max_x'])
 		else:
 			arrbd_x = tuple(arrbd_x)
 
 		if arrbd_y is None:
 			# arrbd_y = arr_bounds(data['y'])
-			arrbd_y = (np.amin(blocks[:,:,1]), np.amax(blocks[:,:,1]))
+			arrbd_y = (collobjs_bounds['bound_min_y'], collobjs_bounds['bound_max_y'])
 		else:
 			arrbd_y = tuple(arrbd_y)
 		
@@ -210,8 +249,8 @@ class Plotters(object):
 		ax.axis('equal')
 		# plt.axis('equal')
 
-		# draw the blocks
-		_plot_collision_boxes(ax, blocks, vecs)
+		# draw the objects
+		_plot_collobjs(collobjs)
 		
 		# Set up formatting for the movie files
 		Writer = animation.writers['ffmpeg']

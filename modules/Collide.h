@@ -8,17 +8,41 @@
 
 #define COLLIDE_FILE "data/collision_objs.tsv"
 
+enum CollisionType
+{
+	Box_Ax,
+	Disc,
+};
+
+
+
 
 struct CollisionObject
 {
+	CollisionType coll_type;
+
+	// bounding box always used
 	double bound_min_x;
 	double bound_min_y;
 
 	double bound_max_x;
 	double bound_max_y;
 
+	// only used if Box
 	double fvec_x;
 	double fvec_y;
+
+	// only used if disc
+	double centerpos_x;
+	double centerpos_y;
+
+	double force;
+	double radius_inner;
+	double radius_outer;
+
+	double angle_min;
+	double angle_max;
+
 };
 
 std::vector<CollisionObject> load_objects();
