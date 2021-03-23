@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 
 
-from collision_object import *
+from collision_object import CollisionType,read_collobjs_tsv,get_bounds
 
 WORM_RADIUS = 80e-6
 
@@ -163,6 +163,40 @@ def body_data_split_DV(data):
 
 
 
+def _get_fig_bounds(
+		collobjs,
+		arrbd_x = None, 
+		arrbd_y = None,
+		figsize_scalar : float = 6.0,
+	):
+	collobjs_bounds = get_bounds(collobjs)
+
+	# set up the figure object
+	if arrbd_x is None:
+		# arrbd_x = arr_bounds(data['x'])
+		arrbd_x = (collobjs_bounds['bound_min_x'], collobjs_bounds['bound_max_x'])
+	else:
+		arrbd_x = tuple(arrbd_x)
+
+	if arrbd_y is None:
+		# arrbd_y = arr_bounds(data['y'])
+		arrbd_y = (collobjs_bounds['bound_min_y'], collobjs_bounds['bound_max_y'])
+	else:
+		arrbd_y = tuple(arrbd_y)
+	
+	print('> positional bounds:\t', arrbd_x, arrbd_y)
+
+	figsize = np.array([
+		arrbd_x[1] - arrbd_x[0],
+		arrbd_y[1] - arrbd_y[0],
+	])
+	
+	# print(f'> figsize:\t{figsize}')
+	figsize = figsize * figsize_scalar / max(figsize)
+
+	return figsize
+
+
 
 class Plotters(object):
 	@staticmethod
@@ -192,7 +226,7 @@ class Plotters(object):
 			arrbd_x = None,
 			arrbd_y = None,
 			limit_frames : Optional[int] = None,
-			figsize_scalar : float = 10.0,
+			figsize_scalar : float = 6.0,
 		):
 		"""
 		https://towardsdatascience.com/animations-with-matplotlib-d96375c5442c
@@ -208,46 +242,16 @@ class Plotters(object):
 
 		# process it
 		data_D, data_V = body_data_split_DV(data)
-		
 
 		collobjs = read_collobjs_tsv(collision_objs_file)
-		collobjs_bounds = get_bounds(collobjs)
-
-		# set up the figure object
-		if arrbd_x is None:
-			# arrbd_x = arr_bounds(data['x'])
-			arrbd_x = (collobjs_bounds['bound_min_x'], collobjs_bounds['bound_max_x'])
-		else:
-			arrbd_x = tuple(arrbd_x)
-
-		if arrbd_y is None:
-			# arrbd_y = arr_bounds(data['y'])
-			arrbd_y = (collobjs_bounds['bound_min_y'], collobjs_bounds['bound_max_y'])
-		else:
-			arrbd_y = tuple(arrbd_y)
 		
-		print('> positional bounds:\t', arrbd_x, arrbd_y)
-	
-		figsize = np.array([
-			arrbd_x[1] - arrbd_x[0],
-			arrbd_y[1] - arrbd_y[0],
-		])
-		
-		# print(f'> figsize:\t{figsize}')
-		figsize = figsize * figsize_scalar / max(figsize)
+		figsize = _get_fig_bounds(collobjs, arrbd_x, arrbd_y, figsize_scalar)
+
 		print(f'> figsize:\t{figsize}')
 		fig, ax = plt.subplots(1, 1, figsize = figsize)
-		# fig, ax = plt.subplots(1, 1)
-		
-		# ax.set_xlim(*arrbd_x)
-		# ax.set_ylim(*arrbd_y)
-
-		# plt.xlim(*arrbd_x)
-		# plt.ylim(*arrbd_y)
 
 		# fix the scaling
 		ax.axis('equal')
-		# plt.axis('equal')
 
 		# draw the objects
 		_plot_collobjs(ax, collobjs)
@@ -287,6 +291,42 @@ class Plotters(object):
 		line_ani.save(out_file, writer = writer)
 
 		print('\n\n> done saving!')
+
+	@staticmethod
+	def single_frame(
+			filename : str = 'data/run/body.dat',
+			collision_objs_file : str = 'data/collision_objs.tsv',
+			arrbd_x = None, arrbd_y = None,
+			i_frame : int = 0,
+			figsize_scalar : float = 10.0,
+		):
+		# read the data
+		data = read_body_data(filename)
+		data_i = np.array([ data[i_frame] ])
+
+		# process it
+		data_D, data_V = body_data_split_DV(data_i)
+
+		collobjs = read_collobjs_tsv(collision_objs_file)
+		figsize = _get_fig_bounds(collobjs, arrbd_x, arrbd_y, figsize_scalar)
+
+		print(f'> figsize:\t{figsize}')
+		fig, ax = plt.subplots(1, 1, figsize = figsize)
+
+		# fix the scaling
+		ax.axis('equal')
+
+		# draw the objects
+		_plot_collobjs(ax, collobjs)
+		
+		# set up the base worm
+		line_D, = ax.plot(data_D[0]['x'], data_D[0]['y'], 'r-')
+		line_V, = ax.plot(data_V[0]['x'], data_V[0]['y'], 'b-')
+
+		plt.show()
+
+		print('> finished setup!')
+
 
 
 
