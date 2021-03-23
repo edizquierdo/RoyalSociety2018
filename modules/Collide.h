@@ -75,6 +75,7 @@ struct VecXY
 
 	bool is_nonzero()
 	{
+        return ((fabs(x) > EPSILON) || (fabs(y) > EPSILON));
 		// NOTE: this printf statement is cursed. somehow `(fabs(y) > EPSILON) ? "true" : "false"` evaluated to "sin" before causing a segfault. no clue what was going on.
 		// printf(
 		// 	"is_nonzero:\t%f,%f,%f\t%s,%s\n", 
@@ -85,7 +86,6 @@ struct VecXY
 		// NOTE: for some reason, abs() doesnt work and casts things to ints
 		// std::cout << std::fixed;
 		// std::cout << std::setprecision(5) << "is_nonzero:\t" << fabs(x) << "," << fabs(y) << ","  << EPSILON << ","  << ((fabs(x) > EPSILON) ? "true" : "false") << ","  << ((fabs(y) > EPSILON) ? "true" : "false") << std::endl;
-        return ((fabs(x) > EPSILON) || (fabs(y) > EPSILON));
     }
 
 	inline double mag()
