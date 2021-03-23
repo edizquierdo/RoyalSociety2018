@@ -6,9 +6,14 @@
 #include <cmath>
 // #include <stdlib.h> 
 
-#ifndef DBL_EPSILON
-	#define DBL_EPSILON 0.0000001
-#endif
+#include <iostream>
+#include <iomanip>
+
+// #ifndef DBL_EPSILON
+// 	#define DBL_EPSILON 0.0000001
+// #endif
+
+const double EPSILON = 0.00000000001;
 
 #define COLLIDE_FILE "data/collision_objs.tsv"
 
@@ -70,7 +75,17 @@ struct VecXY
 
 	bool is_nonzero()
 	{
-        return (abs(x) > DBL_EPSILON || abs(y) > DBL_EPSILON);
+		// NOTE: this printf statement is cursed. somehow `(fabs(y) > EPSILON) ? "true" : "false"` evaluated to "sin" before causing a segfault. no clue what was going on.
+		// printf(
+		// 	"is_nonzero:\t%f,%f,%f\t%s,%s\n", 
+		// 	fabs(x), fabs(y), EPSILON,
+		// 	(fabs(x) > EPSILON) ? "true" : "false", 
+		// 	(fabs(y) > EPSILON) ? "true" : "false"
+		// );
+		// NOTE: for some reason, abs() doesnt work and casts things to ints
+		// std::cout << std::fixed;
+		// std::cout << std::setprecision(5) << "is_nonzero:\t" << fabs(x) << "," << fabs(y) << ","  << EPSILON << ","  << ((fabs(x) > EPSILON) ? "true" : "false") << ","  << ((fabs(y) > EPSILON) ? "true" : "false") << std::endl;
+        return ((fabs(x) > EPSILON) || (fabs(y) > EPSILON));
     }
 
 	inline double mag()

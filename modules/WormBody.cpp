@@ -33,6 +33,13 @@
 
 #include "Collide.h"
 
+// #define DEBUG
+
+#ifdef DEBUG
+	#include <iostream>
+#endif
+
+
 using namespace std;
 
 
@@ -303,10 +310,21 @@ void WormBody::UpdateForces(int start, int end)
                 force_D = do_collide(obj, VecXY(p_D_x, p_D_y));
                 force_V = do_collide(obj, VecXY(p_V_x, p_V_y));
 
+
+                // #ifdef DEBUG
+                //     std::cout << "forces D:\t" << force_D.x << "," << force_D.y << "," << force_V.x << "," << force_V.y << std::endl;
+
+                //     std::cout << "forces V:\t" << force_D.x << "," << force_D.y << "," << force_V.x << "," << force_V.y << std::endl;
+                // #endif
+
                 // if either one is nonzero, apply the force
                 // REVIEW: processing ventral/dorsal forces separately
                 if (force_D.is_nonzero())
                 {
+                    #ifdef DEBUG
+                        std::cout << "forces D:\t" << force_D.x << "," << force_D.y << "," << force_V.x << "," << force_V.y << std::endl;
+                    #endif
+
                     f_D_x[i] += force_D.x;
                     f_D_y[i] += force_D.y;
                     f_V_x[i] += force_D.x;
@@ -314,11 +332,16 @@ void WormBody::UpdateForces(int start, int end)
                 }
                 else if (force_V.is_nonzero())
                 {
+                    
+                    #ifdef DEBUG
+                        std::cout << "forces V:\t" << force_D.x << "," << force_D.y << "," << force_V.x << "," << force_V.y << std::endl;
+                    #endif
+
                     f_D_x[i] += force_V.x;
                     f_D_y[i] += force_V.y;
                     f_V_x[i] += force_V.x;
                     f_V_x[i] += force_V.y;
-                }  
+                }
             }
         }
     }

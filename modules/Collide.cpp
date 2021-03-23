@@ -5,6 +5,11 @@
 
 #include "Collide.h"
 
+#define DEBUG
+
+#ifdef DEBUG
+	#include <iostream>
+#endif
 
 VecXY get_displacement(VecXY a, VecXY b)
 {
@@ -70,11 +75,21 @@ std::vector<CollisionObject> load_objects()
 				>> tempObj.force
 				>> tempObj.radius_inner >> tempObj.radius_outer
 				>> tempObj.angle_min >> tempObj.angle_max;
+
+			// store data
+			CollObjs.push_back(tempObj);
 		}
     }
 
     // close file
     objfile.close();
+
+	#ifdef DEBUG
+		for (CollisionObject obj : CollObjs)
+		{
+			std::cout << obj.coll_type << "," << obj.bound_max_x << "," << obj.bound_min_x << "," << obj.force << std::endl;
+		}
+	#endif
 
 	return CollObjs;
 }
