@@ -122,7 +122,7 @@ VecXY do_collide(CollisionObject obj, VecXY pos)
 		{
 			// check wedge angles
 			double angle = atan2(offset.y, offset.x);			
-			if ( !( obj.angle_max > angle && angle > obj.angle_min ) )
+			if ( !( (obj.angle_min > angle) && (angle > obj.angle_max) ) )
 			{
 				// get the collision vector by normalizing and scaling offset
 				offset.scale(obj.force / offset_mag);
