@@ -250,7 +250,7 @@ class Plotters(object):
 		# plt.axis('equal')
 
 		# draw the objects
-		_plot_collobjs(collobjs)
+		_plot_collobjs(ax, collobjs)
 		
 		# Set up formatting for the movie files
 		Writer = animation.writers['ffmpeg']
