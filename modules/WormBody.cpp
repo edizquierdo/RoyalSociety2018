@@ -266,7 +266,7 @@ void WormBody::UpdateForces(int start, int end)
     for ( CollisionObject obj : CollObjs )
     {
         
-        // check anywhere near a collision box
+        // check anywhere near the collision box
         if (
             (
                 (X(N_rods / 3) > obj.bound_min_x - radius_check)
@@ -284,6 +284,7 @@ void WormBody::UpdateForces(int start, int end)
             // init vars for collision checking
             double x,y,phi;
             double p_D_x,p_D_y,p_V_x,p_V_y;
+            VecXY force_D,force_V;
 
             // if yes, check each rod for collisions
             for (int i = start2; i < end2 - 1; i++)
@@ -298,48 +299,26 @@ void WormBody::UpdateForces(int start, int end)
                 p_V_x = x - R[i]*cos(phi);
                 p_V_y = y - R[i]*sin(phi);
 
-                // forces on dorsal elements
-                if (
-                    (
-                        (p_D_x > obj.bound_min_x)
-                        && (p_D_x < obj.bound_max_x)
-                        && (p_D_y > obj.bound_min_y)
-                        && (p_D_y < obj.bound_max_y)
-                    ) || (
-                        (p_V_x > obj.bound_min_x)
-                        && (p_V_x < obj.bound_max_x)
-                        && (p_V_y > obj.bound_min_y)
-                        && (p_V_y < obj.bound_max_y)
-                    )
-                ){
-                    f_D_x[i] += obj.fvec_x;
-                    f_D_y[i] += obj.fvec_y;
-                    f_V_x[i] += obj.fvec_x;
-                    f_V_x[i] += obj.fvec_y;
+                // compute force vectors
+                force_D = do_collide(obj, VecXY(p_D_x, p_D_y));
+                force_V = do_collide(obj, VecXY(p_V_x, p_V_y));
+
+                // if either one is nonzero, apply the force
+                // REVIEW: processing ventral/dorsal forces separately
+                if (force_D.is_nonzero())
+                {
+                    f_D_x[i] += force_D.x;
+                    f_D_y[i] += force_D.y;
+                    f_V_x[i] += force_D.x;
+                    f_V_x[i] += force_D.y;
                 }
-
-                // REVIEW: forces not working when split up
-                // // forces on dorsal elements
-                // if (
-                //     (p_D_x > obj.bound_min_x)
-                //     && (p_D_x < obj.bound_max_x)
-                //     && (p_D_y > obj.bound_min_y)
-                //     && (p_D_y < obj.bound_max_y)
-                // ){
-                //     f_D_x[i] += obj.fvec_x;
-                //     f_D_y[i] += obj.fvec_y;
-                // }
-
-                // // forces on ventral elements
-                // if (
-                //     (p_V_x > obj.bound_min_x)
-                //     && (p_V_x < obj.bound_max_x)
-                //     && (p_V_y > obj.bound_min_y)
-                //     && (p_V_y < obj.bound_max_y)
-                // ){
-                //     f_V_x[i] += obj.fvec_x;
-                //     f_V_x[i] += obj.fvec_y;
-                // }    
+                else if (force_V.is_nonzero())
+                {
+                    f_D_x[i] += force_V.x;
+                    f_D_y[i] += force_V.y;
+                    f_V_x[i] += force_V.x;
+                    f_V_x[i] += force_V.y;
+                }  
             }
         }
     }

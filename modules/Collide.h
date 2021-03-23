@@ -3,10 +3,15 @@
 
 #include <vector>
 #include <fstream>
+#include <cmath>
 // #include <stdlib.h> 
-// #include <cmath>
+
+#ifndef DBL_EPSILON
+	#define DBL_EPSILON 0.0000001
+#endif
 
 #define COLLIDE_FILE "data/collision_objs.tsv"
+
 
 enum CollisionType
 {
@@ -15,8 +20,8 @@ enum CollisionType
 };
 
 
-
-
+// collision object stuff
+// REVIEW: this would be cleaner if I used polymorphism properly lol
 struct CollisionObject
 {
 	CollisionType coll_type;
@@ -45,9 +50,64 @@ struct CollisionObject
 
 };
 
+// x-y vector stuff
+struct VecXY
+{
+	double x;
+	double y;
+
+	VecXY(double in_x, double in_y)
+	{
+		x = in_x;
+		y = in_y;
+	}
+
+	VecXY()
+	{
+		x = 0.0;
+		y = 0.0;
+	}
+
+	bool is_nonzero()
+	{
+        return (abs(x) > DBL_EPSILON || abs(y) > DBL_EPSILON);
+    }
+
+	inline double mag()
+	{
+		return pow(
+			( pow(x, 2.0) + pow(y, 2.0) ), 
+			0.5
+		);
+	}
+
+	void scale(double c)
+	{
+		x *= c;
+		y *= c;
+	}
+};
+
+// func prototypes
+
+// simple funcs
+VecXY get_displacement(VecXY a, VecXY b);
+double dist(VecXY a, VecXY b);
+
+// the more complicated ones
 std::vector<CollisionObject> load_objects();
+VecXY do_collide(CollisionObject obj, VecXY pos);
+
+
+// TODO: do_collide_friction function
 
 #endif
+
+
+
+
+
+
 
 /* 
 collision code originally from:

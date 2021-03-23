@@ -5,6 +5,23 @@
 
 #include "Collide.h"
 
+
+VecXY get_displacement(VecXY a, VecXY b)
+{
+	return VecXY(
+		a.x - b.x,
+		a.y - b.y
+	);
+}
+
+double dist(VecXY a, VecXY b)
+{
+	return pow((
+		pow(a.x - b.x, 2.0)
+		+ pow(a.y - b.y, 2.0)
+	), 0.5);
+}
+
 std::vector<CollisionObject> load_objects()
 {
 	std::vector<CollisionObject> CollObjs = std::vector<CollisionObject>();
@@ -60,4 +77,45 @@ std::vector<CollisionObject> load_objects()
     objfile.close();
 
 	return CollObjs;
+}
+
+
+VecXY do_collide(CollisionObject obj, VecXY pos)
+{
+	// forces on elements
+	if (obj.coll_type == Box_Ax)
+	{			
+		if (
+			(pos.x > obj.bound_min_x)
+			&& (pos.x < obj.bound_max_x)
+			&& (pos.y > obj.bound_min_y)
+			&& (pos.y < obj.bound_max_y)
+		){
+			return VecXY(obj.fvec_x, obj.fvec_y);
+		}
+	}
+	else if (obj.coll_type == Disc)
+	{
+		VecXY disc_center = VecXY(obj.centerpos_x, obj.centerpos_y);
+		VecXY offset = get_displacement(pos, disc_center);
+		double offset_mag = offset.mag();
+		// compare to radius
+		if (
+			( offset_mag > obj.radius_inner) 
+			&& (offset_mag < obj.radius_outer)
+		)
+		{
+			// check wedge angles
+			double angle = atan2(offset.y, offset.x);			
+			if ( !( obj.angle_max > angle && angle > obj.angle_min ) )
+			{
+				// get the collision vector by normalizing and scaling offset
+				offset.scale(obj.force / offset_mag);
+				return offset;
+			}
+		}
+	}
+
+	// if no collisions found, return zero vec
+	return VecXY();
 }
