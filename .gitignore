@@ -2,6 +2,6 @@
 *.exe
 *.mp4
 data/run/**
-data/coll/**
+data/coll/*.tsv
 data/collision_objs.tsv
 !data/coll/demo/**

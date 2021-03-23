@@ -111,7 +111,7 @@ void curvRatio(TVector<double> &v, TVector<double> &antposcurv)
     }
 }
 
-double EvaluationFunctionB(TVector<double> &v, RandomState &rs)
+double EvaluationFunctionB(TVector<double> &v, RandomState &rs, double angle)
 {
     double fitness;
 
@@ -149,7 +149,7 @@ double EvaluationFunctionB(TVector<double> &v, RandomState &rs)
         w.DumpParams(paramsfile);
     #endif
 
-    w.InitializeState(rs);
+    w.InitializeState(rs, angle);
 
     // Transient
     for (double t = 0.0; t <= Transient; t += StepSize)

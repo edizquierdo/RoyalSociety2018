@@ -168,12 +168,12 @@ Worm::Worm(TVector<double> &v,double output)
     }
 }
 
-void Worm::InitializeState(RandomState &rs)
+void Worm::InitializeState(RandomState &rs, double angle)
 {
     t = 0.0;
     n.RandomizeCircuitState(-0.5, 0.5, rs);
     h.RandomizeCircuitState(-0.5, 0.5, rs);
-    b.InitializeBodyState();
+    b.InitializeBodyState(angle);
     m.InitializeMuscleState();
 }
 

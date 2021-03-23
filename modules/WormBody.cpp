@@ -80,19 +80,28 @@ void InitializeBodyConstants(void)
 // Initialize the state of the body
 // Note that, for a DAE, initial states cannot be chosen arbitrarily. They must be consistent with the DAE.
 // Note also that the integration method SemiImplicitBackwardEulerDAEStep assumes that the initial dZ is 0
-
-void WormBody::InitializeBodyState(void)
+// angle is 
+void WormBody::InitializeBodyState(double angle)
 {
     t = 0.0;
     for (int i = 0; i < N_rods; i++) {
         int i3 = 3*i;
-        // vertical, facing up
-        // Z[i3] = 0.0; Z[i3+1] = -i*L_seg; Z[i3+2] = 0.0;
+        Z[i3] = - i * L_seg * cos(angle);
+        Z[i3+1] = - i * L_seg * sin(angle);
+        Z[i3+2] = angle - M_PI/2;
+        dZ[i3] = dZ[i3+1] = dZ[i3+2] = 0.0;
+
+        // // vertical, facing up
+        // Z[i3] = 0.0; 
+        // Z[i3+1] = -i*L_seg; 
+        // Z[i3+2] = 0.0;
         // dZ[i3] = dZ[i3+1] = dZ[i3+2] = 0.0;
 
-        // Horizontal, facing left
-        Z[i3] = i*L_seg; Z[i3+1] = 0.0; Z[i3+2] = M_PI/2;
-        dZ[i3] = dZ[i3+1] = dZ[i3+2] = 0.0;
+        // // Horizontal, facing left
+        // Z[i3] = i*L_seg; 
+        // Z[i3+1] = 0.0; 
+        // Z[i3+2] = M_PI/2;
+        // dZ[i3] = dZ[i3+1] = dZ[i3+2] = 0.0;
     }
     UpdateKinematics();
     for (int i = 0; i < N_segments; i++)

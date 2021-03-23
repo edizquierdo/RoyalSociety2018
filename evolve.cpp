@@ -174,7 +174,7 @@ double EvaluationFunctionB(TVector<double> &v, RandomState &rs)
     w.DumpParams(paramsfile);
 #endif
 
-    w.InitializeState(rs);
+    w.InitializeState(rs, 3.14159);
 
     // Transient
     for (double t = 0.0; t <= Transient; t += StepSize)

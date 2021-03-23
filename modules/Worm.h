@@ -55,7 +55,7 @@ public:
     
     Worm(TVector<double> &v, double output);
 
-    void InitializeState(RandomState &rs);
+    void InitializeState(RandomState &rs, double angle);
     void HeadStep(double StepSize, double output);
     void Step(double StepSize, double output); 
     

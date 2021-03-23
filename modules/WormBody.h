@@ -27,6 +27,8 @@
 
 using namespace std;
 
+// double M_PI = 3.1415926535897932384626433;
+
 // If the symbol BBC_STRICT is defined, the deviations from the original BBC mentioned in NOTES 1 and 3
 // are replaced with the orginals, so that the two models should be identical
 
@@ -120,7 +122,7 @@ public:
 
     
     // Control
-    void InitializeBodyState(void);
+    void InitializeBodyState(double angle = 0.0);
     inline void StepBody(double h) {SemiImplicitBackwardEulerDAEStep(h);}
 
 private:

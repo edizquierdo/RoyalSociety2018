@@ -9,6 +9,13 @@
 
 int main (int argc, const char* argv[])
 {
+    double angle = 3.14159 / 2.0;
+
+    if (argc > 1)
+    {
+        angle = stod(argv[1]);
+    }
+
     RandomState rs;
     // long seed = static_cast<long>(time(NULL));
     long seed = 0;
@@ -24,7 +31,7 @@ int main (int argc, const char* argv[])
     BestIndividualFile.open("data/best.gen.dat");
     BestIndividualFile >> bestVector;
 
-    EvaluationFunctionB(bestVector, rs);
+    EvaluationFunctionB(bestVector, rs, angle);
     return 0;
 }
 
