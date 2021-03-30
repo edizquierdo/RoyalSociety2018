@@ -28,6 +28,9 @@ Worm::Worm(TVector<double> &v,double output)
     int db, dd, vba, vda, vbp, vdp;
     int ddNext, dbNext, vdaNext, vbaNext;
 
+    n.load_connectome();
+    h.load_connectome();
+
     for (int u = 1; u <= N_units; u++){
         db = nn(DB,u);
         dd = nn(DD,u);
@@ -208,6 +211,8 @@ void Worm::Step(double StepSize, double output)
     // Update Stretch Receptors
     sr.Update();
 
+    // set input to chemosensory neurons
+
     // Set input to Nervous System (Head) from Stretch Receptors
 #ifdef HEADSR
     if (output == 1){
@@ -229,6 +234,7 @@ void Worm::Step(double StepSize, double output)
     h.EulerStep(StepSize);
     n.EulerStep(StepSize);
 
+    // TODO: dynamically read from hash map
     // Set input to Muscles
     //  Input from the head circuit
     dorsalHeadInput = NMJ_SMDD*h.NeuronOutput(SMDD) + NMJ_RMDV*h.NeuronOutput(RMDD);

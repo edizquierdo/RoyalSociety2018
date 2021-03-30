@@ -7,11 +7,22 @@
 
 #include "VectorMatrix.h"
 #include "random.h"
+
+#include "packages/json.hpp"
+
 #include <iostream>
 #include <math.h>
+#include <fstream>
+#include <sstream>
+#include <string>
+#include <unordered_map>
 
 #pragma once
 
+// #define CONNFILE "data/connectome.csv"
+// #define NAMESMAP "data/names_map.csv"
+
+using json = nlohmann::json;
 
 // An entry in a sparse weight matrix
 
@@ -75,6 +86,13 @@ class NervousSystem {
         void RandomizeCircuitOutput(double lb, double ub, RandomState &rs);
         void EulerStep(double stepsize);
         //void RK4Step(double stepsize);
+
+        // loading
+        // TODO: deprecate
+        std::unordered_map<string,int> namesMap;
+        void load_connectome(string connfile);
+        void load_namesMap(string namesMap_file);
+        void parse_json_connectome(json & conn);
 		
         int size, maxchemconns, maxelecconns;
         TVector<double> states, outputs, biases, gains, taus, Rtaus, externalinputs;
@@ -82,5 +100,6 @@ class NervousSystem {
         TVector<int> NumChemicalConns, NumElectricalConns;
         TMatrix<weightentry> chemicalweights, electricalweights;
         TVector<double> TempStates,TempOutputs,k1,k2,k3,k4;
+        std::unordered_map<string,double> wgts_NMJ;
 };
 
