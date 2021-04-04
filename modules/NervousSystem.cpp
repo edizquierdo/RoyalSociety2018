@@ -320,12 +320,12 @@ istream& operator>>(istream& is, NervousSystem& c)
 
 void NervousSystem::loadJSON_neurons(json & neurons)
 {
-    for (auto& [nrn_name, nrn_data] : neurons.items())
+    for (auto& nrn : neurons.items())
     {
-        int idx = nrn_data["idx"];
-        namesMap[nrn_name] = idx;
-        SetNeuronBias(idx, nrn_data["theta"]);
-        SetNeuronTimeConstant(idx, nrn_data["tau"]);
+        int idx = nrn.value()["idx"];
+        namesMap[nrn.key()] = idx;
+        SetNeuronBias(idx, nrn.value()["theta"]);
+        SetNeuronTimeConstant(idx, nrn.value()["tau"]);
     }
 }
 

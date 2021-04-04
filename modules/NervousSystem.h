@@ -21,8 +21,6 @@
 
 #pragma once
 
-// #define CONNFILE "data/connectome.csv"
-// #define NAMESMAP "data/names_map.csv"
 
 using json = nlohmann::json;
 
@@ -47,12 +45,13 @@ inline double InverseSigmoid(double y)
 }
 
 // utility functions for computing size and maximum connections
-int compute_size(json & neurons)
+// REVIEW: for some reason these cause a "multiple definitions" error unless they are inlined
+inline int compute_size(json & neurons)
 {
     return std::distance(neurons.begin(), neurons.end());
 }
 
-int compute_maxconn(json & connections, string conn_type)
+inline int compute_maxconn(json & connections, string conn_type)
 {
     std::unordered_map<string,int> counts = std::unordered_map<string,int>();
 

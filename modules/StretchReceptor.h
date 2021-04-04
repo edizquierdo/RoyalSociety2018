@@ -66,5 +66,5 @@ public:
         // TODO: make this more accurate -- corner distance, or full diffusion sim
         return dist(headpos, foodpos) * chem_signal_scalar;
     }
-}
+};
 
