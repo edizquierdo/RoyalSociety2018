@@ -118,7 +118,7 @@ public:
     double RestingLength(int i);
 
     vector<CollisionObject> CollObjs;
-    void load_CollObjs(void) { CollObjs = load_objects(); }
+    void load_CollObjs(std::string collide_file) { CollObjs = load_objects(collide_file); }
 
     
     // Control

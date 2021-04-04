@@ -15,7 +15,7 @@
 
 const double EPSILON = 0.00000000001;
 
-#define COLLIDE_FILE "data/collision_objs.tsv"
+// #define COLLIDE_FILE "data/collision_objs.tsv"
 
 
 enum CollisionType

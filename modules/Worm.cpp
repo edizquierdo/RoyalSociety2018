@@ -219,12 +219,12 @@ Worm::Worm(json & params)
 
 
 
-void Worm::InitializeState(RandomState &rs, double angle)
+void Worm::InitializeState(RandomState &rs, double angle, std::string collide_file)
 {
     t = 0.0;
     n.RandomizeCircuitState(-0.5, 0.5, rs);
     h.RandomizeCircuitState(-0.5, 0.5, rs);
-    b.InitializeBodyState(angle);
+    b.InitializeBodyState(angle, collide_file);
     m.InitializeMuscleState();
 }
 

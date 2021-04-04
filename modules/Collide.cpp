@@ -27,12 +27,12 @@ double dist(VecXY a, VecXY b)
 	), 0.5);
 }
 
-std::vector<CollisionObject> load_objects()
+std::vector<CollisionObject> load_objects(std::string collide_file)
 {
 	std::vector<CollisionObject> CollObjs = std::vector<CollisionObject>();
 
     // open file
-    std::ifstream objfile(COLLIDE_FILE);
+    std::ifstream objfile(collide_file);
     if (!objfile.is_open() || !objfile.good())
     {
         exit(EXIT_FAILURE);

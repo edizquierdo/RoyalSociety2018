@@ -27,8 +27,6 @@
 #define ENABLE_CTOR_PHENO 0
 #define ENABLE_CTOR_JSON 1
 
-string output_dir = "data/run/";
-
 using namespace std;
 
 
@@ -121,7 +119,7 @@ void curvRatio(TVector<double> &v, TVector<double> &antposcurv)
     }
 }
 
-double EvaluationFunctionB(TVector<double> &v, RandomState &rs, double angle)
+double EvaluationFunction(Worm w, RandomState &rs, double angle, string collision_file, string output_dir)
 {
     double fitness;
 
@@ -146,24 +144,23 @@ double EvaluationFunctionB(TVector<double> &v, RandomState &rs, double angle)
     TVector<double> antpostcurv(1, 2);
     antpostcurv.FillContents(0.0);
 
-    #if ENABLE_CTOR_GENO
-        // Genotype-Phenotype Mapping
-        TVector<double> phenotype(1, VectSize);
-        GenPhenMapping(v, phenotype);
-        Worm w(phenotype, 0);
-    #elif ENABLE_CTOR_PHENO
-        Worm w(v, 0);
-    #elif ENABLE_CTOR_JSON
-        json j;
-        j = json::parse(my_input);
-        Worm w();
+    #ifdef ENABLE_LEGACY_PARAMVEC
+        // this is disabled, dont use it.
+        #if ENABLE_CTOR_GENO
+            // Genotype-Phenotype Mapping
+            TVector<double> phenotype(1, VectSize);
+            GenPhenMapping(param_vec, phenotype);
+            Worm w(phenotype, 0);
+        #elif ENABLE_CTOR_PHENO
+            Worm w(param_vec, 0);
+        #endif
     #endif
 
     #ifdef OUTPUT
         w.DumpParams(paramsfile);
     #endif
 
-    w.InitializeState(rs, angle);
+    w.InitializeState(rs, angle, collision_file);
 
     // Transient
     for (double t = 0.0; t <= Transient; t += StepSize)

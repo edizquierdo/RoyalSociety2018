@@ -81,7 +81,7 @@ void InitializeBodyConstants(void)
 // Note that, for a DAE, initial states cannot be chosen arbitrarily. They must be consistent with the DAE.
 // Note also that the integration method SemiImplicitBackwardEulerDAEStep assumes that the initial dZ is 0
 // angle is 
-void WormBody::InitializeBodyState(double angle)
+void WormBody::InitializeBodyState(double angle, std::string collide_file)
 {
     t = 0.0;
     for (int i = 0; i < N_rods; i++) {
@@ -107,7 +107,7 @@ void WormBody::InitializeBodyState(double angle)
     for (int i = 0; i < N_segments; i++)
         A_D_M[i] = A_V_M[i] = 0.0;
     
-    load_CollObjs();
+    load_CollObjs(collide_file);
 
     radius_check = L_seg * (double) N_rods / 2;
 }

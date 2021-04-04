@@ -6,6 +6,8 @@ evolve: evolve.o Worm.o WormBody.o NervousSystem.o StretchReceptor.o Muscles.o T
 	g++ -o evolve evolve.o Worm.o WormBody.o NervousSystem.o StretchReceptor.o Muscles.o TSearch.o random.o Collide.o -lpthread
 demorun: demorun.o Worm.o WormBody.o NervousSystem.o StretchReceptor.o Muscles.o TSearch.o random.o Collide.o
 	g++ -o demorun demorun.o Worm.o WormBody.o NervousSystem.o StretchReceptor.o Muscles.o TSearch.o random.o Collide.o -lpthread
+singlerun: singlerun.o Worm.o WormBody.o NervousSystem.o StretchReceptor.o Muscles.o TSearch.o random.o Collide.o
+	g++ -o singlerun singlerun.o Worm.o WormBody.o NervousSystem.o StretchReceptor.o Muscles.o TSearch.o random.o Collide.o -lpthread
 random.o: modules/random.cpp modules/random.h modules/VectorMatrix.h
 	g++ $(GCCFLAGS) modules/random.cpp
 TSearch.o: modules/TSearch.cpp modules/TSearch.h
@@ -26,6 +28,8 @@ evolve.o: evolve.cpp modules/Worm.h modules/WormBody.h modules/StretchReceptor.h
 	g++ $(GCCFLAGS) evolve.cpp
 demorun.o: modules/Worm.h modules/WormBody.h modules/StretchReceptor.h modules/Muscles.h modules/TSearch.h modules/Collide.h
 	g++ $(GCCFLAGS) demorun.cpp
+singlerun.o: modules/Worm.h modules/WormBody.h modules/StretchReceptor.h modules/Muscles.h modules/TSearch.h modules/Collide.h
+	g++ $(GCCFLAGS) singlerun.cpp
 clean:
 	rm *.o *.exe
 wipedat:
