@@ -168,6 +168,57 @@ Worm::Worm(TVector<double> &v,double output)
     }
 }
 
+
+
+
+
+
+// json ctor
+Worm::Worm(json & params)
+{
+    // Muscles
+    m.SetMuscleParams(N_muscles, T_muscle);
+
+    // Head Circuit
+    h = NervousSystem(params["Head"]);
+    // VC Circuit
+    n = NervousSystem(params["Head"], N_units);
+
+    // Stretch receptor
+    sr.SetStretchReceptorParams(
+        N_segments, 
+        N_stretchrec, 
+        params["StretchReceptors"]["VC_gain"], 
+        params["StretchReceptors"]["Head_gain"]
+    );
+
+    // NMJ Weights
+    // REVIEW: not very clean
+    NMJ_DB = params["NMJ"]["DB"];
+    NMJ_VBa = params["NMJ"]["VBa"];
+    NMJ_VBp = params["NMJ"]["VBp"];
+    NMJ_DD = params["NMJ"]["DD"];
+    NMJ_VDa = params["NMJ"]["VDa"];
+    NMJ_VDp = params["NMJ"]["VDp"];
+
+    NMJ_SMDD = params["NMJ"]["SMDD"];
+    NMJ_SMDV = params["NMJ"]["SMDV"];
+    NMJ_RMDD = params["NMJ"]["RMDD"];
+    NMJ_RMDV = params["NMJ"]["RMDV"];
+
+    // NMJ Gain
+    // REVIEW: what is this doing?
+    NMJ_Gain_Map = 0.5;
+    NMJ_Gain.SetBounds(1, N_muscles);
+    for (int i=1; i<=N_muscles; i++)
+    {
+        NMJ_Gain(i) = 0.7*(1.0 - (((i-1)*NMJ_Gain_Map)/N_muscles));
+    }
+}
+
+
+
+
 void Worm::InitializeState(RandomState &rs, double angle)
 {
     t = 0.0;

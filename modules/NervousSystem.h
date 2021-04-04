@@ -89,6 +89,8 @@ class NervousSystem {
         NervousSystem(int size = 0, int maxchemconns = -1, int maxelecconns = -1);
         // json based ctor
         NervousSystem(json & ns_data);
+        // json ctor for repeated units
+        NervousSystem(json & ns_data, int n_units);
         // The destructor
         ~NervousSystem();
         
@@ -131,8 +133,8 @@ class NervousSystem {
         void load_connectome(string connfile);
         void load_namesMap(string namesMap_file);
         
-        void loadJSON_neurons(json & neurons);
-        void loadJSON_connections(json & conn);
+        void AddSynapse_JSON(json & syn, int idx_shift_A = 0, int idx_shift_B = 0);
+        void loadJSON_neurons(json & neurons, int idx_shift = 0);
 		
         int size, maxchemconns, maxelecconns;
         TVector<double> states, outputs, biases, gains, taus, Rtaus, externalinputs;

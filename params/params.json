@@ -31,6 +31,14 @@
 				"type" : "ele",
 				"weight" : -9.79669
 			}
+		],
+		"connections_fwd" : [
+			{
+				"from" : "VD",
+				"to" : "VD",
+				"type" : "ele",
+				"weight" : 0.0
+			}
 		]
 	},
 	"NMJ" : {
@@ -42,7 +50,8 @@
 		"VDp" : -0.00105857
 	},
 	"StretchReceptors" : {
-		"data" : "data"
+		"VC_gain" : 0.0,
+		"Head_gain" : 0.0
 	},
 	"ChemoReceptors" : {
 		"data" : "data"

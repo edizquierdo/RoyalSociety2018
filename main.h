@@ -5,15 +5,16 @@
 // February, 2018
 // =============================================================
 
-#include <iostream>
-#include <iomanip>  // cout precision
-#include <math.h>
-#include <pthread.h>
 #include "modules/TSearch.h"
 #include "modules/VectorMatrix.h"
 #include "modules/Worm.h"
+#include "consts.h"
 
-#include "config.h"
+#include <iostream>
+#include <iomanip>  // cout precision
+#include <math.h>
+#include <string>
+#include <pthread.h>
 
 // #define EVOLVE
 // #define PRINTTOFILE
@@ -22,8 +23,16 @@
 // #define SPEEDOUTPUT
 // #define MAP_PHEN
 
+#define ENABLE_CTOR_GENO 0
+#define ENABLE_CTOR_PHENO 0
+#define ENABLE_CTOR_JSON 1
+
+string output_dir = "data/run/";
+
 using namespace std;
 
+
+#if ENABLE_CTOR_GENO
 // ------------------------------------
 // Genotype-Phenotype Mapping
 // ------------------------------------
@@ -99,6 +108,7 @@ void GenPhenMapping(TVector<double> &gen, TVector<double> &phen)
     phen(29) = MapSearchParameter(gen(29), 0.0, NMJmax);    // SMDD, SMDV
     phen(30) = MapSearchParameter(gen(30), 0.0, NMJmax);    // RMDD, RMDV
 }
+#endif
 
 void curvRatio(TVector<double> &v, TVector<double> &antposcurv)
 {
@@ -117,15 +127,15 @@ double EvaluationFunctionB(TVector<double> &v, RandomState &rs, double angle)
 
     #ifdef SPEEDOUTPUT
         ofstream fitfile;
-        fitfile.open("data/run/speed.dat");
+        fitfile.open(output_dir + "speed.dat");
     #endif
 
     #ifdef OUTPUT
         ofstream bodyfile, actfile, curvfile, paramsfile, voltagefile;
-        bodyfile.open("data/run/body.dat");
-        actfile.open("data/run/act.dat");
-        curvfile.open("data/run/curv.dat");
-        paramsfile.open("data/run/params.dat");
+        bodyfile.open(output_dir + "body.dat");
+        actfile.open(output_dir + "act.dat");
+        curvfile.open(output_dir + "curv.dat");
+        paramsfile.open(output_dir + "params.dat");
     #endif
 
     // Fitness
@@ -136,13 +146,17 @@ double EvaluationFunctionB(TVector<double> &v, RandomState &rs, double angle)
     TVector<double> antpostcurv(1, 2);
     antpostcurv.FillContents(0.0);
 
-    #ifdef RAW_PHEN
-        Worm w(v, 0);
-    #else
+    #if ENABLE_CTOR_GENO
         // Genotype-Phenotype Mapping
         TVector<double> phenotype(1, VectSize);
         GenPhenMapping(v, phenotype);
         Worm w(phenotype, 0);
+    #elif ENABLE_CTOR_PHENO
+        Worm w(v, 0);
+    #elif ENABLE_CTOR_JSON
+        json j;
+        j = json::parse(my_input);
+        Worm w();
     #endif
 
     #ifdef OUTPUT

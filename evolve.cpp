@@ -18,6 +18,9 @@
 //#define OUTPUT
 //#define SPEEDOUTPUT
 
+// REVIEW: this doesnt do anything because evolve.cpp doesn't use main.h
+#define ENABLE_CTOR_GENO 1
+
 using namespace std;
 
 // Integration parameters

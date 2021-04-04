@@ -55,6 +55,7 @@ class Worm {
 public:
     
     Worm(TVector<double> &v, double output);
+    Worm(json & params);
 
     void InitializeState(RandomState &rs, double angle);
     void HeadStep(double StepSize, double output);
