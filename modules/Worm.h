@@ -32,6 +32,7 @@ const int HeadMotorNeuronMuscles = 6;  // Head motorneurons innervate first 8 mu
 const int VNCMuscleStart = 7;           // VNC motorneurons innervate starting from 7th muscle
 const int NmusclePerNU = 3;             // All the way down to 24, in groups of 3 per unit
 
+// TODO: remove this, switch to defs from params.json
 // Neuron name conventions
 const int DB = 1;
 const int DD = 2;

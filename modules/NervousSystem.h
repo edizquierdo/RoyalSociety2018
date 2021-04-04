@@ -15,7 +15,9 @@
 #include <fstream>
 #include <sstream>
 #include <string>
+#include <iterator>
 #include <unordered_map>
+#include <algorithm>
 
 #pragma once
 
@@ -44,6 +46,41 @@ inline double InverseSigmoid(double y)
   return log(y/(1-y));
 }
 
+// utility functions for computing size and maximum connections
+int compute_size(json & neurons)
+{
+    return std::distance(neurons.begin(), neurons.end());
+}
+
+int compute_maxconn(json & connections, string conn_type)
+{
+    std::unordered_map<string,int> counts = std::unordered_map<string,int>();
+
+    // count up for for each connection
+    for (auto & conn : connections)
+    {
+        if (conn["type"] == conn_type)
+        {
+            // if it is of the proper type, iterate the counter
+            // REVIEW: target or presynaptic neuron?
+            auto it = counts.find(conn["to"]);
+            if (it != counts.end())
+            {
+                it->second += 1;
+            }
+            else 
+            {
+                // create the counter if it does not exist
+                counts[conn["to"]] = 1;
+            }
+        }
+    }
+
+    // return max element of counts array
+    return std::max_element(counts.begin(), counts.end())->second;
+}
+
+
 
 // The NervousSystem class declaration
 
@@ -51,6 +88,8 @@ class NervousSystem {
     public:
         // The constructor
         NervousSystem(int size = 0, int maxchemconns = -1, int maxelecconns = -1);
+        // json based ctor
+        NervousSystem(json & ns_data);
         // The destructor
         ~NervousSystem();
         
@@ -92,7 +131,9 @@ class NervousSystem {
         std::unordered_map<string,int> namesMap;
         void load_connectome(string connfile);
         void load_namesMap(string namesMap_file);
-        void parse_json_connectome(json & conn);
+        
+        void loadJSON_neurons(json & neurons);
+        void loadJSON_connections(json & conn);
 		
         int size, maxchemconns, maxelecconns;
         TVector<double> states, outputs, biases, gains, taus, Rtaus, externalinputs;

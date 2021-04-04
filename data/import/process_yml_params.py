@@ -1,6 +1,25 @@
 from typing import *
 
+import json
 import yaml
+import copy
+
+NEURON_IDXS : Dict[str,Any] = 	{
+	"head" : {
+		"SMDD" : 1,
+		"RMDD" : 2,
+		"SMDV" : 3,
+		"RMDV" : 4
+	},
+	"body" : {
+		"DB" : 1,
+		"DD" : 2,
+		"VBA" : 3,
+		"VDA" : 4,
+		"VBP" : 5,
+		"VDP" : 6
+	},
+}
 
 
 class process_yaml(object):
@@ -141,8 +160,27 @@ class process_yaml(object):
 			]))
 
 
+	@staticmethod
+	def yaml_to_json(file_in : str, file_out : str = 'params.json'):
+		with open(file_in, 'r') as yaml_fin:
+			yaml_object = yaml.safe_load(yaml_fin) 
 
+		data : Dict[str,Any] = dict()
+		data["NervousSystem"] = {
+			"Head" : dict(),
+			"VentralCord" : dict(),
+			"NMJ" : dict(),
+		}
+		data["NervousSystem"]["Head"]["neurons"] = {
+				name : {
+					"theta" : yaml_object["theta"][name],
+					"tau" : yaml_object["tau"][name],
+				}
+			for name,idx in NEURON_IDXS.items()
+		}
+		
 
+		json.dump(yaml_object, json_out)
 
 
 

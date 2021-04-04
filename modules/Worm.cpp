@@ -28,9 +28,6 @@ Worm::Worm(TVector<double> &v,double output)
     int db, dd, vba, vda, vbp, vdp;
     int ddNext, dbNext, vdaNext, vbaNext;
 
-    n.load_connectome();
-    h.load_connectome();
-
     for (int u = 1; u <= N_units; u++){
         db = nn(DB,u);
         dd = nn(DD,u);

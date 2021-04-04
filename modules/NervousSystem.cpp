@@ -22,6 +22,21 @@ NervousSystem::NervousSystem(int newsize, int newmaxchemconns, int newmaxeleccon
     SetCircuitSize(newsize, newmaxchemconns, newmaxelecconns);
 }
 
+NervousSystem::NervousSystem(json & ns_data)
+{
+    // compute and set the circuit size
+    SetCircuitSize(
+        compute_size(ns_data["neurons"]),
+        compute_maxconn(ns_data["connections"], "chem"),
+        compute_maxconn(ns_data["connections"], "ele")
+    );
+    
+    // load the neuron names and data
+    loadJSON_neurons(ns_data["neurons"]);
+    // load the connections
+    loadJSON_connections(ns_data["connections"]);
+}
+
 
 // The destructor
 
@@ -191,6 +206,7 @@ void NervousSystem::EulerStep(double stepsize)
         paststates[i] = states[i];
     }
     // Update the state of all neurons.
+    // i is the index of the target neuron
     for (int i = 1; i <= size; i++) {
         // External input
         double input = externalinputs[i];
@@ -301,10 +317,23 @@ istream& operator>>(istream& is, NervousSystem& c)
 
 
 
-void NervousSystem::parse_json_connectome(json & conn)
+
+void NervousSystem::loadJSON_neurons(json & neurons)
+{
+    for (auto& [nrn_name, nrn_data] : neurons.items())
+    {
+        int idx = nrn_data["idx"];
+        namesMap[nrn_name] = idx;
+        SetNeuronBias(idx, nrn_data["theta"]);
+        SetNeuronTimeConstant(idx, nrn_data["tau"]);
+    }
+}
+
+
+void NervousSystem::loadJSON_connections(json & connections)
 {
     std::string str_connType;
-    for (auto syn : conn)
+    for (auto syn : connections)
     {
         str_connType = syn["conn_type"];
         if (str_connType == "CHEM")
@@ -317,7 +346,6 @@ void NervousSystem::parse_json_connectome(json & conn)
         }
     }
 }
-
 
 
 
