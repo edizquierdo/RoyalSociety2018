@@ -22,8 +22,10 @@ NervousSystem::NervousSystem(int newsize, int newmaxchemconns, int newmaxeleccon
     SetCircuitSize(newsize, newmaxchemconns, newmaxelecconns);
 }
 
+
+// these arent real constructors because these are initialized really weirdly in the Worm class
 // json ctor
-NervousSystem::NervousSystem(json & ns_data)
+void NervousSystem::init_NS(json & ns_data)
 {
     // compute and set the circuit size
     SetCircuitSize(
@@ -42,7 +44,7 @@ NervousSystem::NervousSystem(json & ns_data)
 }
 
 // json ctor for repeated units
-NervousSystem::NervousSystem(json & ns_data, int n_units)
+void NervousSystem::init_NS_repeatedUnits(json & ns_data, int n_units)
 {
     int unit_size = compute_size(ns_data["neurons"]);
     // compute and set the circuit size

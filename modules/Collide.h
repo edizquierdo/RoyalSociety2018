@@ -110,7 +110,7 @@ VecXY get_displacement(VecXY a, VecXY b);
 double dist(VecXY a, VecXY b);
 
 // the more complicated ones
-std::vector<CollisionObject> load_objects();
+std::vector<CollisionObject> load_objects(std::string collide_file);
 VecXY do_collide(CollisionObject obj, VecXY pos);
 
 

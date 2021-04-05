@@ -180,9 +180,9 @@ Worm::Worm(json & params)
     m.SetMuscleParams(N_muscles, T_muscle);
 
     // Head Circuit
-    h = NervousSystem(params["Head"]);
+    h.init_NS(params["Head"]);
     // VC Circuit
-    n = NervousSystem(params["Head"], N_units);
+    n.init_NS_repeatedUnits(params["Head"], N_units);
 
     // Stretch receptor
     sr.SetStretchReceptorParams(

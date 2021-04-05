@@ -122,7 +122,7 @@ public:
 
     
     // Control
-    void InitializeBodyState(double angle = 0.0);
+    void InitializeBodyState(double angle = 0.0, std::string collide_file = "input/collision_objs.csv");
     inline void StepBody(double h) {SemiImplicitBackwardEulerDAEStep(h);}
 
 private:

@@ -14,6 +14,7 @@
 #include "StretchReceptor.h"
 
 #include <cmath>
+#include <string>
 
 #define PI 3.14159265
 
@@ -57,7 +58,7 @@ public:
     Worm(TVector<double> &v, double output);
     Worm(json & params);
 
-    void InitializeState(RandomState &rs, double angle);
+    void InitializeState(RandomState &rs, double angle, std::string collide_file);
     void HeadStep(double StepSize, double output);
     void Step(double StepSize, double output); 
     

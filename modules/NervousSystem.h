@@ -88,9 +88,9 @@ class NervousSystem {
         // The constructor
         NervousSystem(int size = 0, int maxchemconns = -1, int maxelecconns = -1);
         // json based ctor
-        NervousSystem(json & ns_data);
+        void init_NS(json & ns_data);
         // json ctor for repeated units
-        NervousSystem(json & ns_data, int n_units);
+        void init_NS_repeatedUnits(json & ns_data, int n_units);
         // The destructor
         ~NervousSystem();
         

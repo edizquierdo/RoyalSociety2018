@@ -267,6 +267,13 @@ namespace cxxopts
   {
     return s.empty();
   }
+
+  inline
+  bool
+  isblank(const char x)
+  {
+    return (x == ' ' || x == '\t');
+  }
 } // namespace cxxopts
 
 //ifdef CXXOPTS_USE_UNICODE
@@ -1697,12 +1704,12 @@ namespace cxxopts
       {
         appendNewLine = false;
 
-        if (std::isblank(*previous))
+        if (isblank(*previous))
         {
           lastSpace = current;
         }
 
-        if (!std::isblank(*current))
+        if (!isblank(*current))
         {
           onlyWhiteSpace = false;
         }
