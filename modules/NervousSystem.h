@@ -22,6 +22,12 @@
 #pragma once
 
 
+// connection types
+#define CONNTYPE_CHEM "chem"
+#define CONNTYPE_ELE "ele"
+
+
+
 using json = nlohmann::json;
 
 // An entry in a sparse weight matrix
@@ -58,7 +64,7 @@ inline int compute_maxconn(json & connections, string conn_type)
     // count up for for each connection
     for (auto & conn : connections)
     {
-        if (conn["type"] == conn_type)
+        if (conn["type"].get<string>() == conn_type)
         {
             // if it is of the proper type, iterate the counter
             // REVIEW: target or presynaptic neuron?

@@ -30,8 +30,8 @@ void NervousSystem::init_NS(json & ns_data)
     // compute and set the circuit size
     SetCircuitSize(
         compute_size(ns_data["neurons"]),
-        compute_maxconn(ns_data["connections"], "chem"),
-        compute_maxconn(ns_data["connections"], "ele")
+        compute_maxconn(ns_data["connections"], CONNTYPE_CHEM),
+        compute_maxconn(ns_data["connections"], CONNTYPE_ELE)
     );
     
     // load the neuron names and data
@@ -50,8 +50,8 @@ void NervousSystem::init_NS_repeatedUnits(json & ns_data, int n_units)
     // compute and set the circuit size
     SetCircuitSize(
         n_units * unit_size,
-        compute_maxconn(ns_data["connections"], "chem"),
-        compute_maxconn(ns_data["connections"], "ele")
+        compute_maxconn(ns_data["connections"], CONNTYPE_CHEM),
+        compute_maxconn(ns_data["connections"], CONNTYPE_ELE)
     );
     int idx_shift;
     for (int u = 1; u <= n_units; u++)
@@ -362,10 +362,10 @@ void NervousSystem::loadJSON_neurons(json & neurons, int idx_shift)
 {
     for (auto& nrn : neurons.items())
     {
-        int idx = idx_shift + nrn.value()["idx"];
+        int idx = idx_shift + nrn.value()["idx"].get<int>();
         namesMap[nrn.key()] = idx;
-        SetNeuronBias(idx, nrn.value()["theta"]);
-        SetNeuronTimeConstant(idx, nrn.value()["tau"]);
+        SetNeuronBias(idx, nrn.value()["theta"].get<double>());
+        SetNeuronTimeConstant(idx, nrn.value()["tau"].get<double>());
     }
 }
 
@@ -378,7 +378,7 @@ void NervousSystem::AddSynapse_JSON(json & syn, int idx_shift_A, int idx_shift_B
         SetElectricalSynapseWeight(
             idx_shift_A + namesMap[syn["from"]], 
             idx_shift_B + namesMap[syn["to"]], 
-            syn["weight"]
+            syn["weight"].get<double>()
         );
     }
     else if (syn["type"] == "ele")
@@ -386,7 +386,7 @@ void NervousSystem::AddSynapse_JSON(json & syn, int idx_shift_A, int idx_shift_B
         SetChemicalSynapseWeight(
             idx_shift_A + namesMap[syn["from"]], 
             idx_shift_B + namesMap[syn["to"]], 
-            syn["weight"]
+            syn["weight"].get<double>()
         );
     }
 }
