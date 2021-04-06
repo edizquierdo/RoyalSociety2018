@@ -52,8 +52,7 @@ int main (int argc, const char* argv[])
         seed = static_cast<long>(time(NULL));
     }
     rs.SetRandomSeed(seed);
-
-    PRINT_DEBUG("> set rand seed\n")
+    PRINTF_DEBUG("> set rand seed to %d\n", seed)
 
     // setting up simulation
     InitializeBodyConstants();
@@ -65,9 +64,9 @@ int main (int argc, const char* argv[])
         (std::istreambuf_iterator<char>()    ) 
     ));
     PRINT_DEBUG("> loaded params json\n")
-    std::cout << params.dump();
+    // std::cout << params.dump();
+    PRINT_DEBUG("> creating worm object:\n")
     Worm wrm(params);
-    PRINT_DEBUG("> created worm object\n")
 
     PRINT_DEBUG("> running evaluation:\n")
     EvaluationFunction(

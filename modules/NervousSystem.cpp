@@ -34,6 +34,7 @@ void NervousSystem::init_NS(json & ns_data)
         compute_maxconn(ns_data["connections"], CONNTYPE_CHEM),
         compute_maxconn(ns_data["connections"], CONNTYPE_ELE)
     );
+    PRINTF_DEBUG("      >>  size: %d, max_CHEM: %d, max_ELE: %d\n", size, maxchemconns, maxelecconns)
     
     // load the neuron names and data
     PRINT_DEBUG("    > loading neurons\n")
@@ -51,13 +52,19 @@ void NervousSystem::init_NS(json & ns_data)
 void NervousSystem::init_NS_repeatedUnits(json & ns_data, int n_units)
 {
     PRINT_DEBUG("    > circuit init\n")
-    int unit_size = compute_size(ns_data["neurons"]);
+    
     // compute and set the circuit size
-    SetCircuitSize(
-        n_units * unit_size,
-        compute_maxconn(ns_data["connections"], CONNTYPE_CHEM),
-        compute_maxconn(ns_data["connections"], CONNTYPE_ELE)
-    );
+    int unit_size = compute_size(ns_data["neurons"]);
+    // TODO: instead of adding the maxs together, merge the lists and take the max once
+    int max_CHEM = compute_maxconn(ns_data["connections"], CONNTYPE_CHEM) 
+        + 2 * compute_maxconn(ns_data["connections_fwd"], CONNTYPE_CHEM);
+    int max_ELE = compute_maxconn(ns_data["connections"], CONNTYPE_ELE) 
+        + 2 * compute_maxconn(ns_data["connections_fwd"], CONNTYPE_ELE);
+    
+    SetCircuitSize(n_units * unit_size, max_CHEM, max_ELE);
+    PRINTF_DEBUG("      >>  size: %d, max_CHEM: %d, max_ELE: %d, unit_size: %d\n", size, maxchemconns, maxelecconns, unit_size)
+
+    // initialize each unit
     PRINTF_DEBUG("    > initializing %d units\n", n_units)
     int idx_shift;
     for (int u = 0; u < n_units; u++)
@@ -71,7 +78,6 @@ void NervousSystem::init_NS_repeatedUnits(json & ns_data, int n_units)
         PRINTF_DEBUG("        > synapses\n", u)
         for (auto syn : ns_data["connections"])
         {
-            std::cout << syn << ", " << idx_shift << endl;
             AddSynapse_JSON(syn, idx_shift, idx_shift);
         }
 
@@ -105,13 +111,18 @@ NervousSystem::~NervousSystem()
 
 void NervousSystem::SetCircuitSize(int newsize, int newmaxchemconns, int newmaxelecconns)
 {
-    PRINT_DEBUG("      > processing circuit init...\n")
-    // REVIEW: why... why is this 1-indexed
     size = newsize;
-    if (newmaxchemconns == -1) maxchemconns = size;
-    else maxchemconns = min(newmaxchemconns, size);
-    if (newmaxelecconns == -1) maxelecconns = maxchemconns;
-    else maxelecconns = min(newmaxelecconns, maxchemconns);
+    // since these are now dynamically calculated from params.json in the ctor, we can just store values directly. not sure what kind of magic is going on previously
+    maxchemconns = max(newmaxchemconns,1);
+    maxelecconns = max(newmaxelecconns,1);
+    /*
+        if (newmaxchemconns == -1) maxchemconns = size;
+        else maxchemconns = min(newmaxchemconns, size);
+        if (newmaxelecconns == -1) maxelecconns = maxchemconns;
+        else maxelecconns = min(newmaxelecconns, maxchemconns);
+    */
+
+    // REVIEW: why... why is this 1-indexed
     states.SetBounds(1,size);
     states.FillContents(0.0);
     paststates.SetBounds(1,size);  
@@ -376,8 +387,13 @@ void NervousSystem::loadJSON_neurons(json & neurons, int idx_shift)
     int i = 0;
     for (auto& nrn : neurons.items())
     {
-        int idx = idx_shift + i;
-        namesMap[nrn.key()] = idx;
+        // TODO: when switching to 0-idx, remove the +1 here
+        int idx = idx_shift + i + 1;
+        // if the shift index is nonzero, dont add the names to the map
+        if (idx_shift == 0)
+        {
+            namesMap[nrn.key()] = idx;
+        }
         SetNeuronBias(idx, nrn.value()["theta"].get<double>());
         SetNeuronTimeConstant(idx, nrn.value()["tau"].get<double>());
         i++;
@@ -391,6 +407,8 @@ void NervousSystem::AddSynapse_JSON(json & syn, int idx_shift_A, int idx_shift_B
     int idx_from = idx_shift_A + namesMap.at(syn["from"].get<string>());
     int idx_to = idx_shift_B + namesMap.at(syn["to"].get<string>());
     double weight = syn["weight"].get<double>();
+
+    cout << syn << ", " << idx_from << ", " << idx_to << endl;
 
     if (syn["type"].get<string>() == CONNTYPE_ELE)
     {

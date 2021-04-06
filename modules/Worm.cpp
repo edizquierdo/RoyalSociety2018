@@ -180,12 +180,16 @@ Worm::Worm(json & params)
     PRINT_DEBUG("  > muscles\n")
     m.SetMuscleParams(N_muscles, T_muscle);
 
+    // PRINT_DEBUG("  > validating NS params\n")
+    // params["Head"]
+    // connections
+
     // Head Circuit
     PRINT_DEBUG("  > head NS\n")
     h.init_NS(params["Head"]);
     // VC Circuit
     PRINT_DEBUG("  > VentralCord NS\n")
-    n.init_NS_repeatedUnits(params["Head"], N_units);
+    n.init_NS_repeatedUnits(params["VentralCord"], N_units);
 
     // Stretch receptor
     PRINT_DEBUG("  > StretchReceptors\n")

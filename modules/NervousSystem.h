@@ -55,46 +55,34 @@ inline double InverseSigmoid(double y)
 // REVIEW: for some reason these cause a "multiple definitions" error unless they are inlined
 inline int compute_size(json & neurons)
 {
-    PRINT_DEBUG("      > computing network size\n")
     return std::distance(neurons.begin(), neurons.end());
 }
 
 inline int compute_maxconn(json & connections, string conn_type)
 {
-    PRINT_DEBUG("      > computing network maxconn\n")
     std::unordered_map<string,int> counts = std::unordered_map<string,int>();
 
     // count up for for each connection
     for (auto & conn : connections)
     {
-        if (conn.find("type") != conn.end())
+        if (conn.at("type").get<string>() == conn_type)
         {
-            if (conn["type"].get<string>() == conn_type)
+            cout << conn << endl;
+            // if it is of the proper type, iterate the counter
+            // REVIEW: target or presynaptic neuron?
+            auto it = counts.find(conn["to"].get<string>());
+            if (it != counts.end())
             {
-                PRINTF_DEBUG("          > found conn, type: %s\n", conn["type"].get<string>().c_str())
-                // if it is of the proper type, iterate the counter
-                // REVIEW: target or presynaptic neuron?
-                auto it = counts.find(conn["to"].get<string>());
-                if (it != counts.end())
-                {
-                    it->second += 1;
-                }
-                else 
-                {
-                    // create the counter if it does not exist
-                    counts[conn["to"]] = 1;
-                }
+                it->second += 1;
             }
-        }
-        else
-        {
-            PRINT_DEBUG("      >>  missing type for connection:\t")
-            PRINTF_DEBUG("%s -> %s\n", conn["from"].get<string>(), conn["to"].get<string>())
-            throw;
+            else 
+            {
+                // create the counter if it does not exist
+                counts[conn["to"]] = 1;
+            }
         }
     }
 
-    PRINT_DEBUG("        > finding max elt\n")
     // return max element of counts array
     if (counts.empty())
     {

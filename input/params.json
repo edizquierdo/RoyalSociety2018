@@ -22,6 +22,12 @@
 				"to" : "SMDD",
 				"type" : "chem",
 				"weight" : -11.2755
+			},
+			{
+				"from" : "SMDD",
+				"to" : "SMDD",
+				"type" : "chem",
+				"weight" : -5.2755
 			}
 		]
 	},
@@ -41,6 +47,12 @@
 				"from" : "DB",
 				"to" : "DD",
 				"type" : "ele",
+				"weight" : 9.79669
+			},
+			{
+				"from" : "DB",
+				"to" : "DD",
+				"type" : "chem",
 				"weight" : 9.79669
 			}
 		],
