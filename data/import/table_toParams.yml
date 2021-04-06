@@ -1,6 +1,20 @@
 # source is table in supplementary data:
 # https://royalsocietypublishing.org/doi/suppl/10.1098/rstb.2017.0374
 
+
+neurons:
+  Head:
+    - SMDD
+    - SMDV
+    - RMDD
+    - RMDV
+  VentralCord:
+    - DB
+    - VB
+    - DD
+    - VD    
+
+
 tau:
   SMDD: 0.500646
   SMDV: 0.500646
@@ -24,18 +38,20 @@ theta:
 
 
 StretchReceptor:
-  SMDD: -120.535
-  SMDV: -120.535
-  DB: -165.138
-  VB: -165.138
+  Head_gain: -120.535
+  VC_gain: -165.138
 
 
 weights:
   ele:
-    SMDD,RMDD: 0.0199558
-    SMDV,RMDV: 0.0199558
-    RMDD,RMDV: 1.51095
-    DD,VD: 1.46108
+    SMDD:
+      RMDD: 0.0199558
+    SMDV:
+      RMDV: 0.0199558
+    RMDD:
+      RMDV: 1.51095
+    DD:
+      VD: 1.46108
 
   chem:
     SMDD:
@@ -85,8 +101,13 @@ NMJ:
 
 
 weights_fwd_VC:
-  DB,DB: 0.569164
-  VB,VB: 0.569164
-  DD,DD: 0.994941
-  VD,VD: 0.994941
-  VB,DB: 1.10313
+  DB:
+    DB: 0.569164
+  VB:
+    VB: 0.569164
+  DD:
+    DD: 0.994941
+  VD:
+    VD: 0.994941
+  VB:
+    DB: 1.10313

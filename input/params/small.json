@@ -1,0 +1,87 @@
+{
+	"Head" : {
+		"neurons" : {
+			"SMDD" : {
+				"tau" : 0.500646,
+				"theta" : 6.27095
+			},
+			"SMDV" : {
+				"tau" : 0.500646,
+				"theta" : 6.27095
+			}
+		},
+		"connections" : [
+			{
+				"from" : "SMDD",
+				"to" : "SMDV",
+				"type" : "ele",
+				"weight" : 11.2755
+			},
+			{
+				"from" : "SMDV",
+				"to" : "SMDD",
+				"type" : "chem",
+				"weight" : -11.2755
+			},
+			{
+				"from" : "SMDD",
+				"to" : "SMDD",
+				"type" : "chem",
+				"weight" : -5.2755
+			}
+		]
+	},
+	"VentralCord" : {
+		"neurons" : {
+			"DB" : {
+				"tau" : 0.502865,
+				"theta" : 4.80699
+			},
+			"DD" : {
+				"tau" : 0.502865,
+				"theta" : 4.80699
+			}
+		},
+		"connections" : [
+			{
+				"from" : "DB",
+				"to" : "DD",
+				"type" : "ele",
+				"weight" : 9.79669
+			},
+			{
+				"from" : "DB",
+				"to" : "DD",
+				"type" : "chem",
+				"weight" : 9.79669
+			}
+		],
+		"connections_fwd" : [
+			{
+				"from" : "DD",
+				"to" : "DD",
+				"type" : "ele",
+				"weight" : 0.1
+			}
+		]
+	},
+	"NMJ" : {
+		"DB" : 1.00000,
+		"VBa" : 1.00000,
+		"VBp" : 1.00000,
+		"DD" : 0.00105857,
+		"VDa" : 0.00105857,
+		"VDp" : 0.00105857,
+		"SMDD" : 0.0,
+		"SMDV" : 0.0,
+		"RMDD" : 0.0,
+		"RMDV" : 0.0
+	},
+	"StretchReceptors" : {
+		"VC_gain" : 0.0,
+		"Head_gain" : 0.0
+	},
+	"ChemoReceptors" : {
+		"data" : "data"
+	}
+}

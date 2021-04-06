@@ -4,24 +4,6 @@ import json
 import yaml
 import copy
 
-NEURON_IDXS : Dict[str,Any] = 	{
-	"Head" : {
-		"SMDD" : 1,
-		"RMDD" : 2,
-		"SMDV" : 3,
-		"RMDV" : 4
-	},
-	"VentralCord" : {
-		"DB" : 1,
-		"DD" : 2,
-		"VBA" : 3,
-		"VDA" : 4,
-		"VBP" : 5,
-		"VDP" : 6
-	},
-}
-
-
 class process_yaml(object):
 
 	@staticmethod
@@ -162,9 +144,8 @@ class process_yaml(object):
 
 	@staticmethod
 	def yaml_to_params_json(
-			file_in : str = 'table_converted.yml', 
+			file_in : str = 'table_toParams.yml', 
 			file_out : str = 'params.json',
-			indecies : Dict[str,Dict[str,Any]] = NEURON_IDXS,
 		):
 		# read yaml file created from table
 		with open(file_in, 'r') as yaml_fin:
@@ -172,42 +153,63 @@ class process_yaml(object):
 
 		# declare output dict
 		data : Dict[str,Any] = {
-			"Head" : None,
-			"VentralCord" : None,
-			"NMJ" : None,
-			"StretchReceptors" : None,
-			"ChemoReceptors" : None,
+			"Head" : dict(),
+			"VentralCord" : dict(),
+			"NMJ" : dict(),
+			"StretchReceptors" : dict(),
+			"ChemoReceptors" : dict(),
 		}
 
 		# basic circuit params
 		# `circuit_ID` should be one of "Head", "VentralCord"
-		for circuit_ID in indecies:
+		for circuit_ID,nrns_list in yaml_object["neurons"].items():
+			# set up the neurons
 			data[circuit_ID]["neurons"] = {
 				name : {
-					"idx" : idx,
 					"theta" : yaml_object["theta"][name],
 					"tau" : yaml_object["tau"][name],
 				}
-				for name,idx in indecies[circuit_ID].items()
+				for name in nrns_list
 			}
 
-			data[circuit_ID]["connections"] = [
-				{
-					"from" : idx,
-					"to" : yaml_object["theta"][name],
-					"type" : yaml_object["tau"][name],
-					"weight" : None,
-				}
-				for name,idx in indecies[circuit_ID].items()
-			]
+			# set up the connections
+			data[circuit_ID]["connections"] = list()
+			for connType in ["ele", "chem"]:
+				for preSyn,targets in yaml_object["weights"][connType].items():
+					data[circuit_ID]["connections"] += [
+						{
+							"from" : preSyn,
+							"to" : tgt,
+							"type" : connType,
+							"weight" : wgt,
+						}
+						for tgt,wgt in targets.items()
+						if (preSyn in data[circuit_ID]["neurons"]) and (tgt in data[circuit_ID]["neurons"])
+					]
 
 
-		# VC circuit
+			# VC circuit fwd conns
+			if circuit_ID == "VentralCord":
+				data[circuit_ID]["connections_fwd"] = [
+					{
+						"from" : preSyn,
+						"to" : tgt,
+						"type" : "ele",
+						"weight" : wgt,
+					}
+					for tgt,wgt in targets.items()
+					for preSyn,targets in yaml_object["weights_fwd_VC"]
+				]
 
+		# NMJ conns
+		data["NMJ"] = yaml_object["NMJ"]
+
+		# StretchReceptor params
+		data["StretchReceptor"] = yaml_object["StretchReceptor"]
 
 		
-
-		json.dump(yaml_object, json_out)
+		with open(file_out, 'w') as fout:
+			json.dump(data, fout, indent = 4)
 
 
 
