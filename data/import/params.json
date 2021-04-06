@@ -217,10 +217,9 @@
         "DD": -0.00105857,
         "VD": -0.00105857
     },
-    "StretchReceptors": {},
-    "ChemoReceptors": {},
-    "StretchReceptor": {
+    "StretchReceptors": {
         "Head_gain": -120.535,
         "VC_gain": -165.138
-    }
+    },
+    "ChemoReceptors": {}
 }

@@ -184,7 +184,7 @@ class process_yaml(object):
 							"weight" : wgt,
 						}
 						for tgt,wgt in targets.items()
-						if (preSyn in data[circuit_ID]["neurons"]) and (tgt in data[circuit_ID]["neurons"])
+						if (preSyn in data[circuit_ID]["neurons"])
 					]
 
 
@@ -205,7 +205,7 @@ class process_yaml(object):
 		data["NMJ"] = yaml_object["NMJ"]
 
 		# StretchReceptor params
-		data["StretchReceptor"] = yaml_object["StretchReceptor"]
+		data["StretchReceptors"] = yaml_object["StretchReceptor"]
 
 		
 		with open(file_out, 'w') as fout:
