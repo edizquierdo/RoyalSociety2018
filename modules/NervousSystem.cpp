@@ -27,6 +27,7 @@ NervousSystem::NervousSystem(int newsize, int newmaxchemconns, int newmaxeleccon
 // json ctor
 void NervousSystem::init_NS(json & ns_data)
 {
+    PRINT_DEBUG("    > circuit init\n")
     // compute and set the circuit size
     SetCircuitSize(
         compute_size(ns_data["neurons"]),
@@ -35,8 +36,11 @@ void NervousSystem::init_NS(json & ns_data)
     );
     
     // load the neuron names and data
+    PRINT_DEBUG("    > loading neurons\n")
     loadJSON_neurons(ns_data["neurons"]);
+
     // load the connections
+    PRINT_DEBUG("    > adding synapses\n")
     for (auto syn : ns_data["connections"])
     {
         AddSynapse_JSON(syn);
@@ -94,6 +98,7 @@ NervousSystem::~NervousSystem()
 
 void NervousSystem::SetCircuitSize(int newsize, int newmaxchemconns, int newmaxelecconns)
 {
+    PRINT_DEBUG("      > processing circuit init...\n")
     size = newsize;
     if (newmaxchemconns == -1) maxchemconns = size;
     else maxchemconns = min(newmaxchemconns, size);

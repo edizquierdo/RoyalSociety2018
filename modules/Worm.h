@@ -12,6 +12,7 @@
 #include "NervousSystem.h"
 #include "Muscles.h"
 #include "StretchReceptor.h"
+#include "util.h"
 
 #include <cmath>
 #include <string>

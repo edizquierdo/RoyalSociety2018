@@ -177,14 +177,18 @@ Worm::Worm(TVector<double> &v,double output)
 Worm::Worm(json & params)
 {
     // Muscles
+    PRINT_DEBUG("  > muscles\n")
     m.SetMuscleParams(N_muscles, T_muscle);
 
     // Head Circuit
+    PRINT_DEBUG("  > head NS\n")
     h.init_NS(params["Head"]);
     // VC Circuit
+    PRINT_DEBUG("  > VentralCord NS\n")
     n.init_NS_repeatedUnits(params["Head"], N_units);
 
     // Stretch receptor
+    PRINT_DEBUG("  > StretchReceptors\n")
     sr.SetStretchReceptorParams(
         N_segments, 
         N_stretchrec, 
@@ -194,6 +198,7 @@ Worm::Worm(json & params)
 
     // NMJ Weights
     // REVIEW: not very clean
+    PRINT_DEBUG("  > NMJ params\n")
     NMJ_DB = params["NMJ"]["DB"];
     NMJ_VBa = params["NMJ"]["VBa"];
     NMJ_VBp = params["NMJ"]["VBp"];
@@ -208,12 +213,14 @@ Worm::Worm(json & params)
 
     // NMJ Gain
     // REVIEW: what is this doing?
+    PRINT_DEBUG("  > NMJ gain (?)\n")
     NMJ_Gain_Map = 0.5;
     NMJ_Gain.SetBounds(1, N_muscles);
     for (int i=1; i<=N_muscles; i++)
     {
         NMJ_Gain(i) = 0.7*(1.0 - (((i-1)*NMJ_Gain_Map)/N_muscles));
     }
+    PRINT_DEBUG("  > Worm object ctor done!\n")
 }
 
 

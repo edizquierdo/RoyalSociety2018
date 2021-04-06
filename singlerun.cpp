@@ -7,6 +7,7 @@
 #define ENABLE_CTOR_JSON 1
 
 #include "modules/packages/cxxopts.hpp"
+#include "modules/util.h"
 
 #include "main.h"
 
@@ -30,11 +31,14 @@ int main (int argc, const char* argv[])
     // read command, handle help printing
     auto cmd = options.parse(argc, argv);
 
+
     if (cmd.count("help"))
     {
       std::cout << options.help() << std::endl;
       exit(0);
+    
     }
+    PRINT_DEBUG("> read command line args\n")
     
     // get random seed
     RandomState rs;
@@ -49,18 +53,23 @@ int main (int argc, const char* argv[])
     }
     rs.SetRandomSeed(seed);
 
-
+    PRINT_DEBUG("> set rand seed\n")
 
     // setting up simulation
     InitializeBodyConstants();
+    PRINT_DEBUG("> finished init body constants\n")
     // load worm
     std::ifstream ifs(cmd["params"].as<std::string>());
     json params = json::parse(std::string(
         (std::istreambuf_iterator<char>(ifs) ),
         (std::istreambuf_iterator<char>()    ) 
     ));
+    PRINT_DEBUG("> loaded params json\n")
+    std::cout << params.dump();
     Worm wrm(params);
+    PRINT_DEBUG("> created worm object\n")
 
+    PRINT_DEBUG("> running evaluation:\n")
     EvaluationFunction(
         wrm, 
         rs, 
@@ -68,6 +77,7 @@ int main (int argc, const char* argv[])
         cmd["coll"].as<std::string>(),
         cmd["output"].as<std::string>()
     );
+    PRINT_DEBUG("> finished sim!\n")
     return 0;
 }
 
