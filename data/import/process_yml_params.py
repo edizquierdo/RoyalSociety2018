@@ -5,13 +5,13 @@ import yaml
 import copy
 
 NEURON_IDXS : Dict[str,Any] = 	{
-	"head" : {
+	"Head" : {
 		"SMDD" : 1,
 		"RMDD" : 2,
 		"SMDV" : 3,
 		"RMDV" : 4
 	},
-	"body" : {
+	"VentralCord" : {
 		"DB" : 1,
 		"DD" : 2,
 		"VBA" : 3,
@@ -161,23 +161,50 @@ class process_yaml(object):
 
 
 	@staticmethod
-	def yaml_to_json(file_in : str, file_out : str = 'params.json'):
+	def yaml_to_params_json(
+			file_in : str = 'table_converted.yml', 
+			file_out : str = 'params.json',
+			indecies : Dict[str,Dict[str,Any]] = NEURON_IDXS,
+		):
+		# read yaml file created from table
 		with open(file_in, 'r') as yaml_fin:
 			yaml_object = yaml.safe_load(yaml_fin) 
 
-		data : Dict[str,Any] = dict()
-		data["NervousSystem"] = {
-			"Head" : dict(),
-			"VentralCord" : dict(),
-			"NMJ" : dict(),
+		# declare output dict
+		data : Dict[str,Any] = {
+			"Head" : None,
+			"VentralCord" : None,
+			"NMJ" : None,
+			"StretchReceptors" : None,
+			"ChemoReceptors" : None,
 		}
-		data["NervousSystem"]["Head"]["neurons"] = {
+
+		# basic circuit params
+		# `circuit_ID` should be one of "Head", "VentralCord"
+		for circuit_ID in indecies:
+			data[circuit_ID]["neurons"] = {
 				name : {
+					"idx" : idx,
 					"theta" : yaml_object["theta"][name],
 					"tau" : yaml_object["tau"][name],
 				}
-			for name,idx in NEURON_IDXS.items()
-		}
+				for name,idx in indecies[circuit_ID].items()
+			}
+
+			data[circuit_ID]["connections"] = [
+				{
+					"from" : idx,
+					"to" : yaml_object["theta"][name],
+					"type" : yaml_object["tau"][name],
+					"weight" : None,
+				}
+				for name,idx in indecies[circuit_ID].items()
+			]
+
+
+		# VC circuit
+
+
 		
 
 		json.dump(yaml_object, json_out)

@@ -50,6 +50,7 @@ void NervousSystem::init_NS(json & ns_data)
 // json ctor for repeated units
 void NervousSystem::init_NS_repeatedUnits(json & ns_data, int n_units)
 {
+    PRINT_DEBUG("    > circuit init\n")
     int unit_size = compute_size(ns_data["neurons"]);
     // compute and set the circuit size
     SetCircuitSize(
@@ -57,21 +58,27 @@ void NervousSystem::init_NS_repeatedUnits(json & ns_data, int n_units)
         compute_maxconn(ns_data["connections"], CONNTYPE_CHEM),
         compute_maxconn(ns_data["connections"], CONNTYPE_ELE)
     );
+    PRINTF_DEBUG("    > initializing %d units\n", n_units)
     int idx_shift;
-    for (int u = 1; u <= n_units; u++)
+    for (int u = 0; u < n_units; u++)
     {
+        PRINTF_DEBUG("      > loading unit %d\n", u)
         idx_shift = u * unit_size;
         // neurons in each unit
+        PRINTF_DEBUG("        > neurons\n", u)
         loadJSON_neurons(ns_data["neurons"], idx_shift);
         // connections within units
+        PRINTF_DEBUG("        > synapses\n", u)
         for (auto syn : ns_data["connections"])
         {
+            std::cout << syn << ", " << idx_shift << endl;
             AddSynapse_JSON(syn, idx_shift, idx_shift);
         }
 
         // Gap junctions across units
-        if (u < n_units)
+        if (u < n_units - 1)
         {
+            PRINTF_DEBUG("        > cross-unit gap junctions\n", u)
             for (auto & syn : ns_data["connections_fwd"])
             {
                 // connection goes from unit u to u+1
@@ -99,6 +106,7 @@ NervousSystem::~NervousSystem()
 void NervousSystem::SetCircuitSize(int newsize, int newmaxchemconns, int newmaxelecconns)
 {
     PRINT_DEBUG("      > processing circuit init...\n")
+    // REVIEW: why... why is this 1-indexed
     size = newsize;
     if (newmaxchemconns == -1) maxchemconns = size;
     else maxchemconns = min(newmaxchemconns, size);
@@ -365,12 +373,14 @@ istream& operator>>(istream& is, NervousSystem& c)
 
 void NervousSystem::loadJSON_neurons(json & neurons, int idx_shift)
 {
+    int i = 0;
     for (auto& nrn : neurons.items())
     {
-        int idx = idx_shift + nrn.value()["idx"].get<int>();
+        int idx = idx_shift + i;
         namesMap[nrn.key()] = idx;
         SetNeuronBias(idx, nrn.value()["theta"].get<double>());
         SetNeuronTimeConstant(idx, nrn.value()["tau"].get<double>());
+        i++;
     }
 }
 
@@ -378,21 +388,17 @@ void NervousSystem::loadJSON_neurons(json & neurons, int idx_shift)
 
 void NervousSystem::AddSynapse_JSON(json & syn, int idx_shift_A, int idx_shift_B)
 {
-    if (syn["type"] == "chem")
+    int idx_from = idx_shift_A + namesMap.at(syn["from"].get<string>());
+    int idx_to = idx_shift_B + namesMap.at(syn["to"].get<string>());
+    double weight = syn["weight"].get<double>();
+
+    if (syn["type"].get<string>() == CONNTYPE_ELE)
     {
-        SetElectricalSynapseWeight(
-            idx_shift_A + namesMap[syn["from"]], 
-            idx_shift_B + namesMap[syn["to"]], 
-            syn["weight"].get<double>()
-        );
+        SetElectricalSynapseWeight(idx_from, idx_to, weight);
     }
-    else if (syn["type"] == "ele")
+    else if (syn["type"].get<string>() == CONNTYPE_CHEM)
     {
-        SetChemicalSynapseWeight(
-            idx_shift_A + namesMap[syn["from"]], 
-            idx_shift_B + namesMap[syn["to"]], 
-            syn["weight"].get<double>()
-        );
+        SetChemicalSynapseWeight(idx_from, idx_to, weight);
     }
 }
 

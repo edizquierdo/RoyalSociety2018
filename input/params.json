@@ -2,7 +2,10 @@
 	"Head" : {
 		"neurons" : {
 			"SMDD" : {
-				"idx" : 1,
+				"tau" : 0.500646,
+				"theta" : 6.27095
+			},
+			"SMDV" : {
 				"tau" : 0.500646,
 				"theta" : 6.27095
 			}
@@ -12,6 +15,12 @@
 				"from" : "SMDD",
 				"to" : "SMDV",
 				"type" : "ele",
+				"weight" : 11.2755
+			},
+			{
+				"from" : "SMDV",
+				"to" : "SMDD",
+				"type" : "chem",
 				"weight" : -11.2755
 			}
 		]
@@ -19,7 +28,10 @@
 	"VentralCord" : {
 		"neurons" : {
 			"DB" : {
-				"idx" : 1,
+				"tau" : 0.502865,
+				"theta" : 4.80699
+			},
+			"DD" : {
 				"tau" : 0.502865,
 				"theta" : 4.80699
 			}
@@ -29,15 +41,15 @@
 				"from" : "DB",
 				"to" : "DD",
 				"type" : "ele",
-				"weight" : -9.79669
+				"weight" : 9.79669
 			}
 		],
 		"connections_fwd" : [
 			{
-				"from" : "VD",
-				"to" : "VD",
+				"from" : "DD",
+				"to" : "DD",
 				"type" : "ele",
-				"weight" : 0.0
+				"weight" : 0.1
 			}
 		]
 	},
@@ -45,9 +57,9 @@
 		"DB" : 1.00000,
 		"VBa" : 1.00000,
 		"VBp" : 1.00000,
-		"DD" : -0.00105857,
-		"VDa" : -0.00105857,
-		"VDp" : -0.00105857
+		"DD" : 0.00105857,
+		"VDa" : 0.00105857,
+		"VDp" : 0.00105857
 	},
 	"StretchReceptors" : {
 		"VC_gain" : 0.0,
