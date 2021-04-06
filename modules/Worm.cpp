@@ -185,7 +185,7 @@ Worm::Worm(json & params)
     // connections
 
     // Head Circuit
-    PRINT_DEBUG("  > head NS\n")
+    PRINT_DEBUG("  > Head NS\n")
     h.init_NS(params["Head"]);
     // VC Circuit
     PRINT_DEBUG("  > VentralCord NS\n")

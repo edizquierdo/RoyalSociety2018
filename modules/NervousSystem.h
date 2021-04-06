@@ -67,7 +67,6 @@ inline int compute_maxconn(json & connections, string conn_type)
     {
         if (conn.at("type").get<string>() == conn_type)
         {
-            cout << conn << endl;
             // if it is of the proper type, iterate the counter
             // REVIEW: target or presynaptic neuron?
             auto it = counts.find(conn["to"].get<string>());

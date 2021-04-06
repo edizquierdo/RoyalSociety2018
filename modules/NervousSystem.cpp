@@ -69,13 +69,10 @@ void NervousSystem::init_NS_repeatedUnits(json & ns_data, int n_units)
     int idx_shift;
     for (int u = 0; u < n_units; u++)
     {
-        PRINTF_DEBUG("      > loading unit %d\n", u)
         idx_shift = u * unit_size;
         // neurons in each unit
-        PRINTF_DEBUG("        > neurons\n", u)
         loadJSON_neurons(ns_data["neurons"], idx_shift);
         // connections within units
-        PRINTF_DEBUG("        > synapses\n", u)
         for (auto syn : ns_data["connections"])
         {
             AddSynapse_JSON(syn, idx_shift, idx_shift);
@@ -84,7 +81,6 @@ void NervousSystem::init_NS_repeatedUnits(json & ns_data, int n_units)
         // Gap junctions across units
         if (u < n_units - 1)
         {
-            PRINTF_DEBUG("        > cross-unit gap junctions\n", u)
             for (auto & syn : ns_data["connections_fwd"])
             {
                 // connection goes from unit u to u+1
@@ -407,8 +403,6 @@ void NervousSystem::AddSynapse_JSON(json & syn, int idx_shift_A, int idx_shift_B
     int idx_from = idx_shift_A + namesMap.at(syn["from"].get<string>());
     int idx_to = idx_shift_B + namesMap.at(syn["to"].get<string>());
     double weight = syn["weight"].get<double>();
-
-    cout << syn << ", " << idx_from << ", " << idx_to << endl;
 
     if (syn["type"].get<string>() == CONNTYPE_ELE)
     {
