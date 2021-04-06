@@ -1,12 +1,12 @@
 // Integration parameters
-const double Duration = 100.0;           // Seconds
+const double DURATION = 100.0;           // Seconds
 const double Transient = 10.0;          //
-const double StepSize = 0.01;
+const double STEPSIZE = 0.01;
 const int N_curvs = 23;                 // Number of cuvature points
 
 // Used for Dumping: Frame rate for recording datais set to 50 frames per second
 const double fps = 25.0;
-const int skip = (int) (1/(StepSize*fps));
+const int skip = (int) (1/(STEPSIZE*fps));
 
 // Genotype -> Phenotype Mapping (Ventral cord)
 const double	  BiasRange			         	= 15.0;
@@ -25,7 +25,7 @@ const double    HCSRange                = 15.0;
 
 // Fitness
 const double    AvgSpeed = 0.00022;              // Average speed of the worm in meters per seconds
-const double    BBCfit = AvgSpeed*Duration;
+const double    BBCfit = AvgSpeed*DURATION;
 
 // Size of genotype (VC)
 int	VectSize = 30;

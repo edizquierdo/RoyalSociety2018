@@ -1,5 +1,6 @@
 #define PRINTTOFILE
 //#define SEED
+
 #define OUTPUT
 #define SPEEDOUTPUT
 #define COLLIDE

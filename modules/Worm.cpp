@@ -441,7 +441,7 @@ void Worm::DumpActState(ofstream &ofs, int skips)
         }
         // Head Neurons
         //ofs << "\nH: ";
-        for (int i = 1; i <= 4; i++) {
+        for (int i = 1; i <= h.size; i++) {
             ofs <<  " " << h.NeuronOutput(i);
         }
         // Ventral Cord Motor Neurons

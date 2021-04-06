@@ -5,9 +5,9 @@
 
 #include "Collide.h"
 
-#define DEBUG
+// #define COLLIDE_DEBUG
 
-#ifdef DEBUG
+#ifdef COLLIDE_DEBUG
 	#include <iostream>
 #endif
 
@@ -84,7 +84,7 @@ std::vector<CollisionObject> load_objects(std::string collide_file)
     // close file
     objfile.close();
 
-	#ifdef DEBUG
+	#ifdef COLLIDE_DEBUG
 		for (CollisionObject obj : CollObjs)
 		{
 			std::cout << obj.coll_type << "," << obj.bound_max_x << "," << obj.bound_min_x << "," << obj.force << std::endl;

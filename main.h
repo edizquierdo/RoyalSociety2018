@@ -8,6 +8,7 @@
 #include "modules/TSearch.h"
 #include "modules/VectorMatrix.h"
 #include "modules/Worm.h"
+#include "modules/util.h"
 #include "consts.h"
 
 #include <iostream>
@@ -121,6 +122,7 @@ void curvRatio(TVector<double> &v, TVector<double> &antposcurv)
 
 double EvaluationFunction(Worm w, RandomState &rs, double angle, string collision_file, string output_dir)
 {
+    PRINT_DEBUG("  > opening output files\n")
     double fitness;
 
     #ifdef SPEEDOUTPUT
@@ -136,6 +138,7 @@ double EvaluationFunction(Worm w, RandomState &rs, double angle, string collisio
         paramsfile.open(output_dir + "params.dat");
     #endif
 
+    PRINT_DEBUG("  > initializing arrays\n")
     // Fitness
     fitness = 0.0;
     double bodyorientation, anglediff;
@@ -145,6 +148,7 @@ double EvaluationFunction(Worm w, RandomState &rs, double angle, string collisio
     antpostcurv.FillContents(0.0);
 
     #ifdef ENABLE_LEGACY_PARAMVEC
+        PRINT_DEBUG("  > enabling legacy parameter vector\n")
         // this is disabled, dont use it.
         #if ENABLE_CTOR_GENO
             // Genotype-Phenotype Mapping
@@ -157,15 +161,19 @@ double EvaluationFunction(Worm w, RandomState &rs, double angle, string collisio
     #endif
 
     #ifdef OUTPUT
-        w.DumpParams(paramsfile);
+        PRINT_DEBUG("  > dumping worm params (NOT WORKING)\n")
+        // DEBUG: this tries to access something out of bounds. needs to be rewritten anyway to use json
+        // w.DumpParams(paramsfile);
     #endif
 
+    PRINT_DEBUG("  > initializing worm state\n")
     w.InitializeState(rs, angle, collision_file);
 
     // Transient
-    for (double t = 0.0; t <= Transient; t += StepSize)
+    PRINT_DEBUG("  > transient\n")
+    for (double t = 0.0; t <= Transient; t += STEPSIZE)
     {
-        w.Step(StepSize, 1);
+        w.Step(STEPSIZE, 1);
         #ifdef OUTPUT
                 w.Curvature(curvature);
                 curvfile << curvature << endl;
@@ -174,20 +182,30 @@ double EvaluationFunction(Worm w, RandomState &rs, double angle, string collisio
         #endif
     }
 
+    PRINT_DEBUG("  > xt/yt init (?)\n")
     double xt = w.CoMx(), xtp;
     double yt = w.CoMy(), ytp;
 
     // Time loop
-    for (double t = 0.0; t <= Duration; t += StepSize) {
+    PRINT_DEBUG("  > starting time loop:\n\n")
+    for (double t = 0.0; t <= DURATION; t += STEPSIZE) 
+    {
+        #ifdef UTIL_H_DEBUG 
+            // if on an integer step
+            if ( (t - (int) t < STEPSIZE))
+            {
+                PRINTF_DEBUG("    >>  time:\t%f\t/\t%f\r", t, DURATION)
+            }
+        #endif
 
-        w.Step(StepSize, 1);
+        w.Step(STEPSIZE, 1);
 
         // Current and past centroid position
         xtp = xt; ytp = yt;
         xt = w.CoMx(); yt = w.CoMy();
 
         // Integration error check
-        if (isnan(xt) || isnan(yt) || sqrt(pow(xt-xtp,2)+pow(yt-ytp,2)) > 100*AvgSpeed*StepSize)
+        if (isnan(xt) || isnan(yt) || sqrt(pow(xt-xtp,2)+pow(yt-ytp,2)) > 100*AvgSpeed*STEPSIZE)
         {
             return 0.0;
         }
@@ -199,24 +217,25 @@ double EvaluationFunction(Worm w, RandomState &rs, double angle, string collisio
         temp = cos(anglediff) > 0.0 ? 1.0 : -1.0;           // Add to fitness only movement forward
         distancetravelled += temp * sqrt(pow(xt-xtp,2)+pow(yt-ytp,2));
 
-    #ifdef OUTPUT
-            w.Curvature(curvature);
-            curvfile << curvature << endl;
-            w.DumpBodyState(bodyfile, skip);
-            w.DumpActState(actfile, skip);
-    #endif
+        #ifdef OUTPUT
+                w.Curvature(curvature);
+                curvfile << curvature << endl;
+                w.DumpBodyState(bodyfile, skip);
+                w.DumpActState(actfile, skip);
+        #endif
     }
+    PRINT_DEBUG("\n\n  > finished time loop!\n")
     fitness = 1 - (fabs(BBCfit-distancetravelled)/BBCfit);
 
     #ifdef OUTPUT
-        cout << fitness << " " << BBCfit << " " << distancetravelled << " " << distancetravelled/Duration << endl;
+        cout << fitness << " " << BBCfit << " " << distancetravelled << " " << distancetravelled/DURATION << endl;
         bodyfile.close();
         actfile.close();
         curvfile.close();
     #endif
 
     #ifdef SPEEDOUTPUT
-        fitfile << fitness << " "<< BBCfit << " " << distancetravelled << " " << distancetravelled/Duration << " " << endl;
+        fitfile << fitness << " "<< BBCfit << " " << distancetravelled << " " << distancetravelled/DURATION << " " << endl;
         fitfile.close();
     #endif
 
