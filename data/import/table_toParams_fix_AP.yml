@@ -1,0 +1,134 @@
+# source is table in supplementary data:
+# https://royalsocietypublishing.org/doi/suppl/10.1098/rstb.2017.0374
+
+
+neurons:
+  Head:
+    - SMDD
+    - SMDV
+    - RMDD
+    - RMDV
+  VentralCord:
+    - DB
+    - DD
+    - VBA
+    - VBP
+    - VDA
+    - VDP
+
+tau:
+  SMDD: 0.500646
+  SMDV: 0.500646
+  RMDD: 0.502018
+  RMDV: 0.502018
+  DB: 0.502865
+  DD: 1.67861
+  VBA: 0.502865
+  VBP: 0.502865
+  VDA: 1.67861
+  VDP: 1.67861
+
+theta:
+  SMDD: 6.27095
+  SMDV: 6.27095
+  RMDD: -3.65014
+  RMDV: -3.65014
+  DB: 4.80699
+  DD: -2.94785
+  VBA: 4.80699
+  VBP: 4.80699
+  VDA: -2.94785
+  VDP: -2.94785
+
+
+
+StretchReceptor:
+  Head_gain: -120.535
+  VC_gain: -165.138
+
+
+weights:
+  ele:
+    # head
+    SMDD:
+      RMDD: 0.0199558
+    SMDV:
+      RMDV: 0.0199558
+    RMDD:
+      RMDV: 1.51095
+    
+    # VC
+    DD:
+      VDA: 1.46108
+      VDP: 1.46108
+    VBA:
+      VBP: 0.569164
+    VDA:
+      VDP: 0.994941
+
+
+  chem:
+    # head
+    SMDD:
+      SMDD: -14.9121
+      SMDV: -11.2755
+      RMDV: 14.9933
+
+    SMDV:
+      SMDV: -14.9121
+      SMDD: -11.2755
+      RMDD: 14.9933
+
+    RMDD:
+      RMDD: 6.62512
+      RMDV: -11.6075
+
+    RMDV:
+      RMDV: 6.62512
+      RMDD: -11.6075
+    
+    # VC
+    DB:
+      DB: -14.9544
+      DD: -9.79669
+      VDA: 12.3531
+      VDP: 12.3531
+
+    VBA:
+      VBA: -14.9544
+      VDA: -9.79669
+      DD: 6.17657
+
+    VBP:
+      VBP: -14.9544
+      VDP: -9.79669
+      DD: 6.17657
+
+    DD:
+      DD: 1.13632
+      VDA: 1.66374
+
+NMJ:
+  SMDD: 0.000371977
+  SMDV: 0.000371977
+  RMDD: 1.00000
+  RMDV: 1.00000
+  DB: 1.00000
+  DD: -0.00105857
+  VBA: 1.00000
+  VBP: 1.00000
+  VDA: -0.00105857
+  VDP: -0.00105857
+
+
+weights_fwd_VC:
+  DD:
+    DD: 0.994941
+  VDP:
+    VDA: 0.994941
+  DB:
+    DB: 0.569164
+  VBP:
+    VBA: 0.569164
+  VBP:
+    DB: 1.10313

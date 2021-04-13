@@ -50,15 +50,19 @@ public:
 };
 
 
-class ChemoReceptor{
+class ChemoReceptor {
 public:
     VecXY foodpos;
     double chem_signal_scalar;
+    int target_nrn_idx;
+    bool enabled = false;
 
-    ChemoReceptor(VecXY in_foodpos, double in_chem_signal_scalar)
+    void initialize(VecXY in_foodpos, double in_chem_signal_scalar, int in_target_nrn_idx)
     {
         foodpos = in_foodpos;
         chem_signal_scalar = in_chem_signal_scalar;
+        target_nrn_idx = in_target_nrn_idx;
+        enabled = true;
     }
 
     double get_CR_input(VecXY headpos)
