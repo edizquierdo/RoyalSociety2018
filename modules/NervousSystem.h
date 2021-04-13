@@ -19,6 +19,7 @@
 #include <iterator>
 #include <unordered_map>
 #include <algorithm>
+#include <vector>
 
 #pragma once
 
@@ -159,8 +160,7 @@ class NervousSystem {
         // loading
         // TODO: deprecate
         std::unordered_map<string,int> namesMap;
-        void load_connectome(string connfile);
-        void load_namesMap(string namesMap_file);
+        std::vector<string> namesMapInv;
         
         void AddSynapse_JSON(json & syn, int idx_shift_A = 0, int idx_shift_B = 0);
         void loadJSON_neurons(json & neurons, int idx_shift = 0);

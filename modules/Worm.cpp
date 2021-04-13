@@ -464,6 +464,38 @@ void Worm::DumpBodyState(ofstream &ofs, int skips)
     }
 }
 
+void Worm::DumpActState_header(ofstream &ofs)
+{
+    ofs << "t";
+    //ofs << "\nSR: ";
+    // Stretch receptors
+    ofs <<  " " << "sr.HeadDorsalOutput" << " " << "sr.HeadVentralOutput";
+    for (int i = 1; i <= N_stretchrec; i++) {
+        ofs <<  " " 
+            << "sr.VCDorsalOutput-" << i << " " 
+            << "sr.VCVentralAOutput-" << i << " " 
+            << "sr.VCVentralPOutput" << i;
+    }
+    // Head Neurons
+    //ofs << "\nH: ";
+    for (int i = 1; i <= h.size; i++) {
+        ofs <<  " " << "h.NeuronOutput-" << i;
+    }
+    // Ventral Cord Motor Neurons
+    //ofs << "\nV: ";
+    for (int i = 1; i <= N_units; i++) {
+        for (int j = 1; j <= N_neuronsperunit; j++) {
+            ofs <<  " " << n.NeuronOutput(nn(j,i));
+        }
+    }
+    // Muscles
+    //ofs << "\nM: ";
+    for (int i = 1; i <= N_muscles; i++) {
+        ofs <<  " " << m.DorsalMuscleOutput(i) << " " << m.VentralMuscleOutput(i);
+    }
+    ofs << "\n";
+}
+
 void Worm::DumpActState(ofstream &ofs, int skips)
 {
     static int tt = skips;

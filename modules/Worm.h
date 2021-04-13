@@ -51,6 +51,7 @@ public:
     
     void DumpBodyState(ofstream &ofs, int skips);
     void DumpActState(ofstream &ofs, int skips);
+    void DumpActState_header(ofstream &ofs);
     void DumpVoltage(ofstream &ofs, int skips);
     void DumpParams(ofstream &ofs);
     
