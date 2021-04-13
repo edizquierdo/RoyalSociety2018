@@ -198,7 +198,7 @@ class process_yaml(object):
 						"weight" : wgt,
 					}
 					for tgt,wgt in targets.items()
-					for preSyn,targets in yaml_object["weights_fwd_VC"]
+					for preSyn,targets in yaml_object["weights_fwd_VC"].items()
 				]
 
 		# NMJ conns
