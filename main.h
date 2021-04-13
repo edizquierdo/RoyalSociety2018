@@ -122,7 +122,7 @@ void curvRatio(TVector<double> &v, TVector<double> &antposcurv)
 
 double EvaluationFunction(Worm w, RandomState &rs, double angle, string collision_file, string output_dir)
 {
-    PRINT_DEBUG("  > opening output files\n")
+    PRINTF_DEBUG("  > opening output files in %s\n", output_dir)
     double fitness;
 
     #ifdef SPEEDOUTPUT
@@ -227,11 +227,17 @@ double EvaluationFunction(Worm w, RandomState &rs, double angle, string collisio
     PRINT_DEBUG("\n\n  > finished time loop!\n")
     fitness = 1 - (fabs(BBCfit-distancetravelled)/BBCfit);
 
+
     #ifdef OUTPUT
-        cout << fitness << " " << BBCfit << " " << distancetravelled << " " << distancetravelled/DURATION << endl;
+        PRINTF_DEBUG("  > closing files, saving to %s\n", output_dir.c_str())
         bodyfile.close();
         actfile.close();
         curvfile.close();
+        PRINTF_DEBUG(
+            "    >>  fitness: %f, BBCfit: %f, distance: %f, speed: %f\n", 
+            fitness, BBCfit, distancetravelled, distancetravelled/DURATION
+        )
+        // cout << fitness << " " << BBCfit << " " << distancetravelled << " " << distancetravelled/DURATION << endl;
     #endif
 
     #ifdef SPEEDOUTPUT

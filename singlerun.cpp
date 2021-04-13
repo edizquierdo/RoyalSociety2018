@@ -20,18 +20,25 @@ int main (int argc, const char* argv[])
     // set up command line parser
     cxxopts::Options options("PhysWormSim", "Mechanical and electrophysiological simulation of C. elegans nematode");
     options.add_options()
-        ("p,params", "params json file", cxxopts::value<std::string>()->default_value("input/params.json"))
-        ("c,coll", "collision tsv file", cxxopts::value<std::string>()->default_value("input/collision_objs.tsv"))
-        ("a,angle", "starting angle", cxxopts::value<double>()->default_value("1.570795"))
-        ("o,output", "output dir", cxxopts::value<string>()->default_value("data/run/"))
-        ("r,rand", "random initialization seed based on time", cxxopts::value<bool>())
-        ("s,seed", "set random initialization seed. takes priority over `rand`. seed is 0 by default.", cxxopts::value<long>())
+        ("p,params", "params json file", 
+            cxxopts::value<std::string>()->default_value("input/params.json"))
+        ("c,coll", "collision tsv file", 
+            cxxopts::value<std::string>()->default_value("input/collision_objs.tsv"))
+        ("a,angle", "starting angle", 
+            cxxopts::value<double>()->default_value("1.570795"))
+        ("o,output", "output dir", 
+            cxxopts::value<string>()->default_value("data/run/"))
+        ("r,rand", "random initialization seed based on time", 
+            cxxopts::value<bool>())
+        ("d,duration", "sim duration in seconds", 
+            cxxopts::value<double>()->default_value("100.0"))
+        ("s,seed", "set random initialization seed. takes priority over `rand`. seed is 0 by default.", 
+            cxxopts::value<long>())
         ("h,help", "print usage")
     ;
 
     // read command, handle help printing
     auto cmd = options.parse(argc, argv);
-
 
     if (cmd.count("help"))
     {
@@ -55,6 +62,9 @@ int main (int argc, const char* argv[])
     rs.SetRandomSeed(seed);
     PRINTF_DEBUG("> set rand seed to %d\n", seed)
 
+    // set duration
+    DURATION = cmd["duration"].as<double>();;
+
     // setting up simulation
     InitializeBodyConstants();
     PRINT_DEBUG("> finished init body constants\n")
@@ -66,7 +76,7 @@ int main (int argc, const char* argv[])
             (std::istreambuf_iterator<char>()    )
         )
     );
-    PRINT_DEBUG("> loaded params json\n")
+    PRINTF_DEBUG("> loaded params json from: %s\n", cmd["params"].as<std::string>())
     // std::cout << params.dump();
     PRINT_DEBUG("> creating worm object:\n")
     Worm wrm(params);
@@ -79,7 +89,7 @@ int main (int argc, const char* argv[])
         cmd["coll"].as<std::string>(),
         cmd["output"].as<std::string>()
     );
-    PRINT_DEBUG("> finished sim!\n")
+    PRINT_DEBUG("> finished!\n")
     return 0;
 }
 
