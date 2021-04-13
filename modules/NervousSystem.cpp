@@ -38,6 +38,7 @@ void NervousSystem::init_NS(json & ns_data)
     
     // load the neuron names and data
     PRINT_DEBUG("    > loading neurons\n")
+    namesMapInv = std::vector<string>(size + 1, "NULL");
     loadJSON_neurons(ns_data["neurons"]);
 
     // load the connections
@@ -64,6 +65,7 @@ void NervousSystem::init_NS_repeatedUnits(json & ns_data, int n_units)
     
     SetCircuitSize(n_units * unit_size, max_CHEM, max_ELE);
     PRINTF_DEBUG("      >>  size: %d, max_CHEM: %d, max_ELE: %d, unit_size: %d\n", size, maxchemconns, maxelecconns, unit_size)
+    namesMapInv = std::vector<string>(size + 1, "NULL");
 
     // initialize each unit
     PRINTF_DEBUG("    > initializing %d units\n", n_units)
@@ -396,6 +398,7 @@ void NervousSystem::loadJSON_neurons(json & neurons, int idx_shift)
         {
             namesMap[nrn.key()] = idx;
         }
+        namesMapInv[idx] = nrn.key();
         SetNeuronBias(idx, nrn.value()["theta"].get<double>());
         SetNeuronTimeConstant(idx, nrn.value()["tau"].get<double>());
         i++;

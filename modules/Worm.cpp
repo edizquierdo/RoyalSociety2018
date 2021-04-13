@@ -205,7 +205,6 @@ Worm::Worm(json & params)
     VBP = n.namesMap["VBP"];
     VDP = n.namesMap["VDP"];
 
-
     // Stretch receptor
     PRINT_DEBUG("  > Stretch Receptors\n")
     sr.SetStretchReceptorParams(
@@ -472,26 +471,27 @@ void Worm::DumpActState_header(ofstream &ofs)
     ofs <<  " " << "sr.HeadDorsalOutput" << " " << "sr.HeadVentralOutput";
     for (int i = 1; i <= N_stretchrec; i++) {
         ofs <<  " " 
-            << "sr.VCDorsalOutput-" << i << " " 
-            << "sr.VCVentralAOutput-" << i << " " 
-            << "sr.VCVentralPOutput" << i;
+            << "sr.VCDorsalOutput:" << i << " " 
+            << "sr.VCVentralAOutput:" << i << " " 
+            << "sr.VCVentralPOutput:" << i;
     }
     // Head Neurons
     //ofs << "\nH: ";
     for (int i = 1; i <= h.size; i++) {
-        ofs <<  " " << "h.NeuronOutput-" << i;
+        ofs <<  " " << h.namesMapInv[i];
     }
     // Ventral Cord Motor Neurons
     //ofs << "\nV: ";
     for (int i = 1; i <= N_units; i++) {
         for (int j = 1; j <= N_neuronsperunit; j++) {
-            ofs <<  " " << n.NeuronOutput(nn(j,i));
+            ofs <<  " " << n.namesMapInv[nn(j,i)] << ":" << i;
         }
     }
     // Muscles
     //ofs << "\nM: ";
     for (int i = 1; i <= N_muscles; i++) {
-        ofs <<  " " << m.DorsalMuscleOutput(i) << " " << m.VentralMuscleOutput(i);
+        ofs <<  " " << "m.DorsalMuscleOutput:" << i 
+            << " " << "m.VentralMuscleOutput:" << i;
     }
     ofs << "\n";
 }

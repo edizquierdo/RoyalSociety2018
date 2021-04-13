@@ -134,6 +134,7 @@ double EvaluationFunction(Worm w, RandomState &rs, double angle, string collisio
         ofstream bodyfile, actfile, curvfile, paramsfile, voltagefile;
         bodyfile.open(output_dir + "body.dat");
         actfile.open(output_dir + "act.dat");
+        w.DumpActState_header(actfile);
         curvfile.open(output_dir + "curv.dat");
         paramsfile.open(output_dir + "params.dat");
     #endif
