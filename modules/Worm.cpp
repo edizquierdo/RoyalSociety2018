@@ -221,8 +221,8 @@ Worm::Worm(json & params)
     {
         chemo_re.initialize(
             VecXY(
-                params["foodPos"]["x"].get<double>(), 
-                params["foodPos"]["y"].get<double>()
+                params["ChemoReceptors"]["foodPos"]["x"].get<double>(), 
+                params["ChemoReceptors"]["foodPos"]["y"].get<double>()
             ),
             params["ChemoReceptors"]["scalar"].get<double>(),
             h.namesMap[params["ChemoReceptors"]["neuron"].get<string>()]
