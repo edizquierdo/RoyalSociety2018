@@ -64,8 +64,7 @@ int main (int argc, const char* argv[])
         std::string(
             (std::istreambuf_iterator<char>(ifs) ),
             (std::istreambuf_iterator<char>()    )
-        ),
-        ignore_comments = true
+        )
     );
     PRINT_DEBUG("> loaded params json\n")
     // std::cout << params.dump();
