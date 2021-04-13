@@ -192,23 +192,37 @@ Worm::Worm(json & params)
     n.init_NS_repeatedUnits(params["VentralCord"], N_units);
 
     // Stretch receptor
-    PRINT_DEBUG("  > StretchReceptors\n")
+    PRINT_DEBUG("  > Stretch Receptors\n")
     sr.SetStretchReceptorParams(
         N_segments, 
         N_stretchrec, 
-        params["StretchReceptors"]["VC_gain"], 
-        params["StretchReceptors"]["Head_gain"]
+        params["StretchReceptors"]["VC_gain"].get<double>(), 
+        params["StretchReceptors"]["Head_gain"].get<double>()
     );
 
+    // chemosensory receptor
+    PRINT_DEBUG("  > Chemo Receptors\n")
+    if (params.find("ChemoReceptors") != params.end())
+    {
+        chemo_re.initialize(
+            VecXY(
+                params["foodPos"]["x"].get<double>(), 
+                params["foodPos"]["y"].get<double>()
+            ),
+            params["ChemoReceptors"]["scalar"].get<double>(),
+            h.namesMap[params["ChemoReceptors"]["neuron"].get<string>()]
+        );
+    }
+
     // NMJ Weights
-    // REVIEW: not very clean
+    // REVIEW: not very clean 
     PRINT_DEBUG("  > NMJ params\n")
     NMJ_DB = params["NMJ"]["DB"];
-    NMJ_VBa = params["NMJ"]["VBa"];
-    NMJ_VBp = params["NMJ"]["VBp"];
+    NMJ_VBa = params["NMJ"]["VBA"];
+    NMJ_VBp = params["NMJ"]["VBP"];
     NMJ_DD = params["NMJ"]["DD"];
-    NMJ_VDa = params["NMJ"]["VDa"];
-    NMJ_VDp = params["NMJ"]["VDp"];
+    NMJ_VDa = params["NMJ"]["VDA"];
+    NMJ_VDp = params["NMJ"]["VDP"];
 
     NMJ_SMDD = params["NMJ"]["SMDD"];
     NMJ_SMDV = params["NMJ"]["SMDV"];
@@ -267,27 +281,34 @@ void Worm::Step(double StepSize, double output)
         sr.SetVentralInput(i, vs);
     }
 
+    // get chemosensory neuron input
+    if (chemo_re.enabled)
+    {
+        h.SetNeuronExternalInput(
+            chemo_re.target_nrn_idx,
+            chemo_re.get_CR_input(VecXY(b.X(0), b.Y(0)))
+        );
+    }
+
     // Update Stretch Receptors
     sr.Update();
 
-    // set input to chemosensory neurons
-
     // Set input to Nervous System (Head) from Stretch Receptors
-#ifdef HEADSR
-    if (output == 1){
-        h.SetNeuronExternalInput(SMDD, sr.HeadDorsalOutput());    // Average of first
-        h.SetNeuronExternalInput(SMDV, sr.HeadVentralOutput());   // to segments
-    }
-#endif
+    #ifdef HEADSR
+        if (output == 1){
+            h.SetNeuronExternalInput(SMDD, sr.HeadDorsalOutput());    // Average of first
+            h.SetNeuronExternalInput(SMDV, sr.HeadVentralOutput());   // to segments
+        }
+    #endif
 
     // Set input to Nervous System (Ventral Cord) from Stretch Receptors
-#ifdef VNCSR
-    for (int i = 1; i <= N_units; i++){
-        n.SetNeuronExternalInput(nn(DB,i), sr.VCDorsalOutput(i));
-        n.SetNeuronExternalInput(nn(VBA,i), sr.VCVentralAOutput(i));
-        n.SetNeuronExternalInput(nn(VBP,i), sr.VCVentralPOutput(i));
-    }
-#endif
+    #ifdef VNCSR
+        for (int i = 1; i <= N_units; i++){
+            n.SetNeuronExternalInput(nn(DB,i), sr.VCDorsalOutput(i));
+            n.SetNeuronExternalInput(nn(VBA,i), sr.VCVentralAOutput(i));
+            n.SetNeuronExternalInput(nn(VBP,i), sr.VCVentralPOutput(i));
+        }
+    #endif
 
     // Update Nervous System
     h.EulerStep(StepSize);

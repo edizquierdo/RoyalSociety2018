@@ -60,10 +60,13 @@ int main (int argc, const char* argv[])
     PRINT_DEBUG("> finished init body constants\n")
     // load worm
     std::ifstream ifs(cmd["params"].as<std::string>());
-    json params = json::parse(std::string(
-        (std::istreambuf_iterator<char>(ifs) ),
-        (std::istreambuf_iterator<char>()    ) 
-    ));
+    json params = json::parse(
+        std::string(
+            (std::istreambuf_iterator<char>(ifs) ),
+            (std::istreambuf_iterator<char>()    )
+        ),
+        ignore_comments = true
+    );
     PRINT_DEBUG("> loaded params json\n")
     // std::cout << params.dump();
     PRINT_DEBUG("> creating worm object:\n")

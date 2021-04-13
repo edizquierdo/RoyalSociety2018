@@ -58,7 +58,7 @@ inline int compute_size(json & neurons)
     return std::distance(neurons.begin(), neurons.end());
 }
 
-inline int compute_maxconn(json & connections, string conn_type)
+inline int compute_maxconn(json & connections, string conn_type, string direction = "from")
 {
     std::unordered_map<string,int> counts = std::unordered_map<string,int>();
 
@@ -69,7 +69,7 @@ inline int compute_maxconn(json & connections, string conn_type)
         {
             // if it is of the proper type, iterate the counter
             // REVIEW: target or presynaptic neuron?
-            auto it = counts.find(conn["to"].get<string>());
+            auto it = counts.find(conn[direction].get<string>());
             if (it != counts.end())
             {
                 it->second += 1;
@@ -77,7 +77,7 @@ inline int compute_maxconn(json & connections, string conn_type)
             else 
             {
                 // create the counter if it does not exist
-                counts[conn["to"]] = 1;
+                counts[conn[direction]] = 1;
             }
         }
     }
@@ -95,6 +95,13 @@ inline int compute_maxconn(json & connections, string conn_type)
     }
 }
 
+inline int compute_maxconn_bidir(json & connections, string conn_type)
+{
+    return max(
+        compute_maxconn(connections, conn_type, "from"), 
+        compute_maxconn(connections, conn_type, "to")
+    );
+}
 
 
 // The NervousSystem class declaration

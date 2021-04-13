@@ -77,6 +77,7 @@ public:
     Muscles m;
     NervousSystem n;
     StretchReceptor sr;
+    ChemoReceptor chemo_re;
     NervousSystem h;
     
     double t; // Time
