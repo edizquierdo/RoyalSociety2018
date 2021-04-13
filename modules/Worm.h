@@ -34,20 +34,6 @@ const int HeadMotorNeuronMuscles = 6;  // Head motorneurons innervate first 8 mu
 const int VNCMuscleStart = 7;           // VNC motorneurons innervate starting from 7th muscle
 const int NmusclePerNU = 3;             // All the way down to 24, in groups of 3 per unit
 
-// TODO: remove this, switch to defs from params.json
-// Neuron name conventions
-const int DB = 1;
-const int DD = 2;
-const int VBA = 3;
-const int VDA = 4;
-const int VBP = 5;
-const int VDP = 6;
-
-// Neuron name conventions
-const int SMDD = 1;
-const int RMDD = 2;
-const int SMDV = 3;
-const int RMDV = 4;
 
 // Body segment name conventions
 const int Head = 1;
@@ -86,6 +72,19 @@ public:
     double NMJ_DB, NMJ_VBa, NMJ_VBp, NMJ_DD, NMJ_VDa, NMJ_VDp;
     double NMJ_SMDD, NMJ_RMDD, NMJ_SMDV, NMJ_RMDV;
     double NMJ_Gain_Map;
+
+    // Neuron name conventions
+    int DB = -1;
+    int DD = -1;
+    int VBA = -1;
+    int VDA = -1;
+    int VBP = -1;
+    int VDP = -1;
+
+    int SMDD = -1;
+    int RMDD = -1;
+    int SMDV = -1;
+    int RMDV = -1;
     
     TVector<double> NMJ_Gain;
     

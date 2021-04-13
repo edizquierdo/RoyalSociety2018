@@ -191,6 +191,21 @@ Worm::Worm(json & params)
     PRINT_DEBUG("  > VentralCord NS\n")
     n.init_NS_repeatedUnits(params["VentralCord"], N_units);
 
+
+    PRINT_DEBUG("  > updating neuron indecies\n")
+    SMDD = h.namesMap["SMDD"];
+    RMDD = h.namesMap["RMDD"];
+    SMDV = h.namesMap["SMDV"];
+    RMDV = h.namesMap["RMDV"];
+
+    DB = n.namesMap["DB"];
+    DD = n.namesMap["DD"];
+    VBA = n.namesMap["VBA"];
+    VDA = n.namesMap["VDA"];
+    VBP = n.namesMap["VBP"];
+    VDP = n.namesMap["VDP"];
+
+
     // Stretch receptor
     PRINT_DEBUG("  > Stretch Receptors\n")
     sr.SetStretchReceptorParams(

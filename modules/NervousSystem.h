@@ -104,6 +104,12 @@ inline int compute_maxconn_bidir(json & connections, string conn_type)
 }
 
 
+inline int compute_maxconn_bidir_sum(json & connections, string conn_type)
+{
+    return compute_maxconn(connections, conn_type, "from") + compute_maxconn(connections, conn_type, "to");
+}
+
+
 // The NervousSystem class declaration
 
 class NervousSystem {

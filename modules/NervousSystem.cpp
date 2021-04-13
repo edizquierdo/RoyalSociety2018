@@ -32,7 +32,7 @@ void NervousSystem::init_NS(json & ns_data)
     SetCircuitSize(
         compute_size(ns_data["neurons"]),
         compute_maxconn(ns_data["connections"], CONNTYPE_CHEM) + 1,
-        compute_maxconn_bidir(ns_data["connections"], CONNTYPE_ELE)
+        compute_maxconn_bidir_sum(ns_data["connections"], CONNTYPE_ELE)
     );
     PRINTF_DEBUG("      >>  size: %d, max_CHEM: %d, max_ELE: %d\n", size, maxchemconns, maxelecconns)
     
@@ -57,8 +57,10 @@ void NervousSystem::init_NS_repeatedUnits(json & ns_data, int n_units)
     int unit_size = compute_size(ns_data["neurons"]);
     // REVIEW: connection count calculation is bugged :/
     // TODO: instead of adding the maxs together, merge the lists and take the max once
-    int max_CHEM = 2 * compute_maxconn_bidir(ns_data["connections"], CONNTYPE_CHEM) + 2 * compute_maxconn_bidir(ns_data["connections_fwd"], CONNTYPE_CHEM) + 1;
-    int max_ELE = 2 * compute_maxconn_bidir(ns_data["connections"], CONNTYPE_ELE) + 2 * compute_maxconn_bidir(ns_data["connections_fwd"], CONNTYPE_ELE);
+    int max_CHEM = compute_maxconn_bidir(ns_data["connections"], CONNTYPE_CHEM) 
+        + compute_maxconn_bidir_sum(ns_data["connections_fwd"], CONNTYPE_CHEM) + 1;
+    int max_ELE = compute_maxconn_bidir_sum(ns_data["connections"], CONNTYPE_ELE) 
+        + compute_maxconn_bidir_sum(ns_data["connections_fwd"], CONNTYPE_ELE);
     
     SetCircuitSize(n_units * unit_size, max_CHEM, max_ELE);
     PRINTF_DEBUG("      >>  size: %d, max_CHEM: %d, max_ELE: %d, unit_size: %d\n", size, maxchemconns, maxelecconns, unit_size)
@@ -71,10 +73,10 @@ void NervousSystem::init_NS_repeatedUnits(json & ns_data, int n_units)
     {
         idx_shift = u * unit_size;
         // neurons in each unit
-        // PRINTF_DEBUG("      > loading neurons unit %d\n", u)
+        PRINTF_DEBUG("      > loading neurons unit %d\n", u)
         loadJSON_neurons(ns_data["neurons"], idx_shift);
         // connections within units
-        // PRINTF_DEBUG("      > loading synapses unit %d\n", u)
+        PRINTF_DEBUG("      > loading synapses unit %d\n", u)
         for (auto syn : ns_data["connections"])
         {
             AddSynapse_JSON(syn, idx_shift, idx_shift);
@@ -83,7 +85,7 @@ void NervousSystem::init_NS_repeatedUnits(json & ns_data, int n_units)
         // Gap junctions across units
         if (u < n_units - 1)
         {
-            // PRINTF_DEBUG("      > loading fwd conns unit %d\n", u)
+            PRINTF_DEBUG("      > loading fwd conns unit %d\n", u)
             for (auto & syn : ns_data["connections_fwd"])
             {
                 // connection goes from unit u to u+1
@@ -389,6 +391,7 @@ void NervousSystem::loadJSON_neurons(json & neurons, int idx_shift)
         // TODO: when switching to 0-idx, remove the +1 here
         int idx = idx_shift + i + 1;
         // if the shift index is nonzero, dont add the names to the map
+        PRINTF_DEBUG("        >>  creating neuron %s at idx %d\n", nrn.key().c_str(), idx)
         if (idx_shift == 0)
         {
             namesMap[nrn.key()] = idx;
@@ -403,18 +406,18 @@ void NervousSystem::loadJSON_neurons(json & neurons, int idx_shift)
 
 void NervousSystem::AddSynapse_JSON(json & syn, int idx_shift_A, int idx_shift_B)
 {
-    // PRINTF_DEBUG("            >>  f: %s, t: %s, w: %f, t: %s\n", 
-    //     syn["from"].get<string>().c_str(), 
-    //     syn["to"].get<string>().c_str(), 
-    //     syn["weight"].get<double>(), 
-    //     syn["type"].get<string>().c_str()
-    // )
+    PRINTF_DEBUG("            >>  f: %s, t: %s, w: %f, t: %s\n", 
+        syn["from"].get<string>().c_str(), 
+        syn["to"].get<string>().c_str(), 
+        syn["weight"].get<double>(), 
+        syn["type"].get<string>().c_str()
+    )
     
     int idx_from = idx_shift_A + namesMap.at(syn["from"].get<string>());
     int idx_to = idx_shift_B + namesMap.at(syn["to"].get<string>());
     double weight = syn["weight"].get<double>();
 
-    // PRINTF_DEBUG("            >>> f: %d, t: %d, w: %f, t: %s\n", idx_from, idx_to, weight, syn["type"].get<string>().c_str())
+    PRINTF_DEBUG("            >>> f: %d, t: %d, w: %f, t: %s\n", idx_from, idx_to, weight, syn["type"].get<string>().c_str())
 
     if (syn["type"].get<string>() == CONNTYPE_ELE)
     {

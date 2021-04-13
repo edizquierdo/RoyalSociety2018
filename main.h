@@ -122,7 +122,7 @@ void curvRatio(TVector<double> &v, TVector<double> &antposcurv)
 
 double EvaluationFunction(Worm w, RandomState &rs, double angle, string collision_file, string output_dir)
 {
-    PRINTF_DEBUG("  > opening output files in %s\n", output_dir)
+    PRINTF_DEBUG("  > opening output files in %s\n", output_dir.c_str())
     double fitness;
 
     #ifdef SPEEDOUTPUT

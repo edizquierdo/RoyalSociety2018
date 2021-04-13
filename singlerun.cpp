@@ -79,7 +79,7 @@ int main (int argc, const char* argv[])
         true,
         true
     );
-    PRINTF_DEBUG("> loaded params json from: %s\n", cmd["params"].as<std::string>())
+    PRINTF_DEBUG("> loaded params json from: %s\n", cmd["params"].as<std::string>().c_str())
     // std::cout << params.dump();
     PRINT_DEBUG("> creating worm object:\n")
     Worm wrm(params);

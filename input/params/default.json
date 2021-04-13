@@ -97,8 +97,8 @@
                 "weight": 0.0199558
             },
             {
-                "from": "RMDD",
-                "to": "RMDV",
+                "from": "RMDV",
+                "to": "RMDD",
                 "type": "ele",
                 "weight": 1.51095
             }
