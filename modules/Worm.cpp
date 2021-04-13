@@ -168,12 +168,74 @@ Worm::Worm(TVector<double> &v,double output)
     }
 }
 
-void Worm::InitializeState(RandomState &rs, double angle)
+
+
+
+
+
+// json ctor
+Worm::Worm(json & params)
+{
+    // Muscles
+    PRINT_DEBUG("  > muscles\n")
+    m.SetMuscleParams(N_muscles, T_muscle);
+
+    // PRINT_DEBUG("  > validating NS params\n")
+    // params["Head"]
+    // connections
+
+    // Head Circuit
+    PRINT_DEBUG("  > Head NS\n")
+    h.init_NS(params["Head"]);
+    // VC Circuit
+    PRINT_DEBUG("  > VentralCord NS\n")
+    n.init_NS_repeatedUnits(params["VentralCord"], N_units);
+
+    // Stretch receptor
+    PRINT_DEBUG("  > StretchReceptors\n")
+    sr.SetStretchReceptorParams(
+        N_segments, 
+        N_stretchrec, 
+        params["StretchReceptors"]["VC_gain"], 
+        params["StretchReceptors"]["Head_gain"]
+    );
+
+    // NMJ Weights
+    // REVIEW: not very clean
+    PRINT_DEBUG("  > NMJ params\n")
+    NMJ_DB = params["NMJ"]["DB"];
+    NMJ_VBa = params["NMJ"]["VBa"];
+    NMJ_VBp = params["NMJ"]["VBp"];
+    NMJ_DD = params["NMJ"]["DD"];
+    NMJ_VDa = params["NMJ"]["VDa"];
+    NMJ_VDp = params["NMJ"]["VDp"];
+
+    NMJ_SMDD = params["NMJ"]["SMDD"];
+    NMJ_SMDV = params["NMJ"]["SMDV"];
+    NMJ_RMDD = params["NMJ"]["RMDD"];
+    NMJ_RMDV = params["NMJ"]["RMDV"];
+
+    // NMJ Gain
+    // REVIEW: what is this doing?
+    PRINT_DEBUG("  > NMJ gain (?)\n")
+    NMJ_Gain_Map = 0.5;
+    NMJ_Gain.SetBounds(1, N_muscles);
+    for (int i=1; i<=N_muscles; i++)
+    {
+        NMJ_Gain(i) = 0.7*(1.0 - (((i-1)*NMJ_Gain_Map)/N_muscles));
+    }
+    PRINT_DEBUG("  > Worm object ctor done!\n")
+}
+
+
+
+
+void Worm::InitializeState(RandomState &rs, double angle, std::string collide_file)
 {
     t = 0.0;
     n.RandomizeCircuitState(-0.5, 0.5, rs);
     h.RandomizeCircuitState(-0.5, 0.5, rs);
-    b.InitializeBodyState(angle);
+    b.InitializeBodyState(angle, collide_file);
     m.InitializeMuscleState();
 }
 
@@ -208,6 +270,8 @@ void Worm::Step(double StepSize, double output)
     // Update Stretch Receptors
     sr.Update();
 
+    // set input to chemosensory neurons
+
     // Set input to Nervous System (Head) from Stretch Receptors
 #ifdef HEADSR
     if (output == 1){
@@ -229,6 +293,7 @@ void Worm::Step(double StepSize, double output)
     h.EulerStep(StepSize);
     n.EulerStep(StepSize);
 
+    // TODO: dynamically read from hash map
     // Set input to Muscles
     //  Input from the head circuit
     dorsalHeadInput = NMJ_SMDD*h.NeuronOutput(SMDD) + NMJ_RMDV*h.NeuronOutput(RMDD);
@@ -376,7 +441,7 @@ void Worm::DumpActState(ofstream &ofs, int skips)
         }
         // Head Neurons
         //ofs << "\nH: ";
-        for (int i = 1; i <= 4; i++) {
+        for (int i = 1; i <= h.size; i++) {
             ofs <<  " " << h.NeuronOutput(i);
         }
         // Ventral Cord Motor Neurons

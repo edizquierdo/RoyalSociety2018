@@ -12,8 +12,10 @@
 #include "NervousSystem.h"
 #include "Muscles.h"
 #include "StretchReceptor.h"
+#include "util.h"
 
 #include <cmath>
+#include <string>
 
 #define PI 3.14159265
 
@@ -32,6 +34,7 @@ const int HeadMotorNeuronMuscles = 6;  // Head motorneurons innervate first 8 mu
 const int VNCMuscleStart = 7;           // VNC motorneurons innervate starting from 7th muscle
 const int NmusclePerNU = 3;             // All the way down to 24, in groups of 3 per unit
 
+// TODO: remove this, switch to defs from params.json
 // Neuron name conventions
 const int DB = 1;
 const int DD = 2;
@@ -54,8 +57,9 @@ class Worm {
 public:
     
     Worm(TVector<double> &v, double output);
+    Worm(json & params);
 
-    void InitializeState(RandomState &rs, double angle);
+    void InitializeState(RandomState &rs, double angle, std::string collide_file);
     void HeadStep(double StepSize, double output);
     void Step(double StepSize, double output); 
     

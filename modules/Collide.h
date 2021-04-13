@@ -15,7 +15,7 @@
 
 const double EPSILON = 0.00000000001;
 
-#define COLLIDE_FILE "data/collision_objs.tsv"
+// #define COLLIDE_FILE "data/collision_objs.tsv"
 
 
 enum CollisionType
@@ -110,7 +110,7 @@ VecXY get_displacement(VecXY a, VecXY b);
 double dist(VecXY a, VecXY b);
 
 // the more complicated ones
-std::vector<CollisionObject> load_objects();
+std::vector<CollisionObject> load_objects(std::string collide_file);
 VecXY do_collide(CollisionObject obj, VecXY pos);
 
 

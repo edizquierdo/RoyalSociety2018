@@ -118,11 +118,11 @@ public:
     double RestingLength(int i);
 
     vector<CollisionObject> CollObjs;
-    void load_CollObjs(void) { CollObjs = load_objects(); }
+    void load_CollObjs(std::string collide_file) { CollObjs = load_objects(collide_file); }
 
     
     // Control
-    void InitializeBodyState(double angle = 0.0);
+    void InitializeBodyState(double angle = 0.0, std::string collide_file = "input/collision_objs.csv");
     inline void StepBody(double h) {SemiImplicitBackwardEulerDAEStep(h);}
 
 private:

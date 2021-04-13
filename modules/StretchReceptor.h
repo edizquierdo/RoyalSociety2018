@@ -6,9 +6,12 @@
 //  Copyright © 2015 Eduardo Izquierdo. All rights reserved.
 //
 
+#include <cmath>
+
 #include "VectorMatrix.h"
 #include "random.h"
-#include <cmath>
+#include "Collide.h"
+
 using namespace std;
 
 class StretchReceptor {
@@ -44,5 +47,24 @@ public:
     TVector<double> VA_sr;
     TVector<double> VP_sr;
     
+};
+
+
+class ChemoReceptor{
+public:
+    VecXY foodpos;
+    double chem_signal_scalar;
+
+    ChemoReceptor(VecXY in_foodpos, double in_chem_signal_scalar)
+    {
+        foodpos = in_foodpos;
+        chem_signal_scalar = in_chem_signal_scalar;
+    }
+
+    double get_CR_input(VecXY headpos)
+    {
+        // TODO: make this more accurate -- corner distance, or full diffusion sim
+        return dist(headpos, foodpos) * chem_signal_scalar;
+    }
 };
 

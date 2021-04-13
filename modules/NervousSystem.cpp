@@ -7,6 +7,7 @@
 
 #include "NervousSystem.h"
 #include "random.h"
+
 #include <stdlib.h>
 
 
@@ -19,6 +20,74 @@
 NervousSystem::NervousSystem(int newsize, int newmaxchemconns, int newmaxelecconns)
 {
     SetCircuitSize(newsize, newmaxchemconns, newmaxelecconns);
+}
+
+
+// these arent real constructors because these are initialized really weirdly in the Worm class
+// json ctor
+void NervousSystem::init_NS(json & ns_data)
+{
+    PRINT_DEBUG("    > circuit init\n")
+    // compute and set the circuit size
+    SetCircuitSize(
+        compute_size(ns_data["neurons"]),
+        compute_maxconn(ns_data["connections"], CONNTYPE_CHEM),
+        compute_maxconn(ns_data["connections"], CONNTYPE_ELE)
+    );
+    PRINTF_DEBUG("      >>  size: %d, max_CHEM: %d, max_ELE: %d\n", size, maxchemconns, maxelecconns)
+    
+    // load the neuron names and data
+    PRINT_DEBUG("    > loading neurons\n")
+    loadJSON_neurons(ns_data["neurons"]);
+
+    // load the connections
+    PRINT_DEBUG("    > adding synapses\n")
+    for (auto syn : ns_data["connections"])
+    {
+        AddSynapse_JSON(syn);
+    }
+}
+
+// json ctor for repeated units
+void NervousSystem::init_NS_repeatedUnits(json & ns_data, int n_units)
+{
+    PRINT_DEBUG("    > circuit init\n")
+    
+    // compute and set the circuit size
+    int unit_size = compute_size(ns_data["neurons"]);
+    // TODO: instead of adding the maxs together, merge the lists and take the max once
+    int max_CHEM = compute_maxconn(ns_data["connections"], CONNTYPE_CHEM) 
+        + 2 * compute_maxconn(ns_data["connections_fwd"], CONNTYPE_CHEM);
+    int max_ELE = compute_maxconn(ns_data["connections"], CONNTYPE_ELE) 
+        + 2 * compute_maxconn(ns_data["connections_fwd"], CONNTYPE_ELE);
+    
+    SetCircuitSize(n_units * unit_size, max_CHEM, max_ELE);
+    PRINTF_DEBUG("      >>  size: %d, max_CHEM: %d, max_ELE: %d, unit_size: %d\n", size, maxchemconns, maxelecconns, unit_size)
+
+    // initialize each unit
+    PRINTF_DEBUG("    > initializing %d units\n", n_units)
+    int idx_shift;
+    for (int u = 0; u < n_units; u++)
+    {
+        idx_shift = u * unit_size;
+        // neurons in each unit
+        loadJSON_neurons(ns_data["neurons"], idx_shift);
+        // connections within units
+        for (auto syn : ns_data["connections"])
+        {
+            AddSynapse_JSON(syn, idx_shift, idx_shift);
+        }
+
+        // Gap junctions across units
+        if (u < n_units - 1)
+        {
+            for (auto & syn : ns_data["connections_fwd"])
+            {
+                // connection goes from unit u to u+1
+                AddSynapse_JSON(syn, idx_shift, idx_shift + unit_size);
+            }
+        }
+    }
 }
 
 
@@ -39,10 +108,17 @@ NervousSystem::~NervousSystem()
 void NervousSystem::SetCircuitSize(int newsize, int newmaxchemconns, int newmaxelecconns)
 {
     size = newsize;
-    if (newmaxchemconns == -1) maxchemconns = size;
-    else maxchemconns = min(newmaxchemconns, size);
-    if (newmaxelecconns == -1) maxelecconns = maxchemconns;
-    else maxelecconns = min(newmaxelecconns, maxchemconns);
+    // since these are now dynamically calculated from params.json in the ctor, we can just store values directly. not sure what kind of magic is going on previously
+    maxchemconns = max(newmaxchemconns,1);
+    maxelecconns = max(newmaxelecconns,1);
+    /*
+        if (newmaxchemconns == -1) maxchemconns = size;
+        else maxchemconns = min(newmaxchemconns, size);
+        if (newmaxelecconns == -1) maxelecconns = maxchemconns;
+        else maxelecconns = min(newmaxelecconns, maxchemconns);
+    */
+
+    // REVIEW: why... why is this 1-indexed
     states.SetBounds(1,size);
     states.FillContents(0.0);
     paststates.SetBounds(1,size);  
@@ -190,6 +266,7 @@ void NervousSystem::EulerStep(double stepsize)
         paststates[i] = states[i];
     }
     // Update the state of all neurons.
+    // i is the index of the target neuron
     for (int i = 1; i <= size; i++) {
         // External input
         double input = externalinputs[i];
@@ -295,3 +372,167 @@ istream& operator>>(istream& is, NervousSystem& c)
     // Return the istream
     return is;
 }
+
+
+
+
+
+
+void NervousSystem::loadJSON_neurons(json & neurons, int idx_shift)
+{
+    int i = 0;
+    for (auto& nrn : neurons.items())
+    {
+        // TODO: when switching to 0-idx, remove the +1 here
+        int idx = idx_shift + i + 1;
+        // if the shift index is nonzero, dont add the names to the map
+        if (idx_shift == 0)
+        {
+            namesMap[nrn.key()] = idx;
+        }
+        SetNeuronBias(idx, nrn.value()["theta"].get<double>());
+        SetNeuronTimeConstant(idx, nrn.value()["tau"].get<double>());
+        i++;
+    }
+}
+
+
+
+void NervousSystem::AddSynapse_JSON(json & syn, int idx_shift_A, int idx_shift_B)
+{
+    int idx_from = idx_shift_A + namesMap.at(syn["from"].get<string>());
+    int idx_to = idx_shift_B + namesMap.at(syn["to"].get<string>());
+    double weight = syn["weight"].get<double>();
+
+    if (syn["type"].get<string>() == CONNTYPE_ELE)
+    {
+        SetElectricalSynapseWeight(idx_from, idx_to, weight);
+    }
+    else if (syn["type"].get<string>() == CONNTYPE_CHEM)
+    {
+        SetChemicalSynapseWeight(idx_from, idx_to, weight);
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*
+reads connections and other data from tsv file
+valid formats:
+- SYN_CHEM_i : [int, int, float]
+- SYN_ELE_i : [int, int, float]
+- SYN_CHEM : [str, str, float]
+- SYN_ELE : [str, str, float]
+*/
+void NervousSystem::load_connectome(string connfile)
+{
+    // open file
+    std::ifstream fin(connfile);
+    if (!fin.is_open() || !fin.good())
+    {
+        exit(EXIT_FAILURE);
+    }
+
+    // temp vars
+    std::string raw_line;
+	std::string str_connType;
+    double val;
+    int int_a, int_b;
+    std::string str_a, str_b;
+
+    // loop
+    while(getline(fin, raw_line))
+	{
+        // read the string into a stream for easier reading
+        std::istringstream liness(raw_line);
+        // clear temp vars
+        val = NAN; int_a = -1; int_b = -1; str_a = ""; str_b = "";
+        
+        // read connection type
+        liness >> str_connType;
+
+        // make conns based on type
+        if (str_connType == "SYN_CHEM_i")
+        {
+            // chemical synapses by index
+            liness >> int_a >> int_b >> val;
+            SetChemicalSynapseWeight(int_a, int_b, val);
+        }
+        else if (str_connType == "SYN_ELE_i")
+        {
+            // electrical synapses by index
+            liness >> int_a >> int_b >> val;
+            SetElectricalSynapseWeight(int_a, int_b, val);
+        }
+        else if (str_connType == "SYN_CHEM")
+        {
+            // chemical synapses by name
+            liness >> str_a >> str_b >> val;
+            SetChemicalSynapseWeight(namesMap[str_a], namesMap[str_b], val);
+        }
+        else if (str_connType == "SYN_ELE")
+        {
+            // electrical synapses by name
+            liness >> str_a >> str_b >> val;
+            SetElectricalSynapseWeight(namesMap[str_a], namesMap[str_b], val);
+        }
+        else if (str_connType == "WGT_NMJ")
+        {
+            // NMJ weights by name
+            liness >> str_a >> val;
+            wgts_NMJ[str_a] = val;
+        }
+        
+    }
+
+    // close file
+    fin.close();
+}
+
+
+void NervousSystem::load_namesMap(string namesMap_file)
+{
+    namesMap = std::unordered_map<string,int>();
+
+    // open file
+    std::ifstream fin(namesMap_file);
+    if (!fin.is_open() || !fin.good())
+    {
+        exit(EXIT_FAILURE);
+    }
+
+    // temp vars
+    std::string raw_line;
+	std::string str_name;
+    int int_idx;
+
+    while(getline(fin, raw_line))
+	{
+        // read the string into a stream for easier reading
+        std::istringstream liness(raw_line);
+        // clear temp vars
+        str_name = ""; int_idx = -1;
+        
+        // read name and index
+        liness >> str_name >> int_idx;
+
+        // write to hash map
+        namesMap[str_name] = int_idx;
+    }
+
+    // close file
+    fin.close();
+}
+

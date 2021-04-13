@@ -5,9 +5,9 @@
 
 #include "Collide.h"
 
-#define DEBUG
+// #define COLLIDE_DEBUG
 
-#ifdef DEBUG
+#ifdef COLLIDE_DEBUG
 	#include <iostream>
 #endif
 
@@ -27,12 +27,12 @@ double dist(VecXY a, VecXY b)
 	), 0.5);
 }
 
-std::vector<CollisionObject> load_objects()
+std::vector<CollisionObject> load_objects(std::string collide_file)
 {
 	std::vector<CollisionObject> CollObjs = std::vector<CollisionObject>();
 
     // open file
-    std::ifstream objfile(COLLIDE_FILE);
+    std::ifstream objfile(collide_file);
     if (!objfile.is_open() || !objfile.good())
     {
         exit(EXIT_FAILURE);
@@ -84,7 +84,7 @@ std::vector<CollisionObject> load_objects()
     // close file
     objfile.close();
 
-	#ifdef DEBUG
+	#ifdef COLLIDE_DEBUG
 		for (CollisionObject obj : CollObjs)
 		{
 			std::cout << obj.coll_type << "," << obj.bound_max_x << "," << obj.bound_min_x << "," << obj.force << std::endl;

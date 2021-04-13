@@ -3,7 +3,8 @@
 #define OUTPUT
 #define SPEEDOUTPUT
 #define COLLIDE
-#define RAW_PHEN
+
+#define ENABLE_CTOR_JSON 1
 
 #include "main.h"
 
