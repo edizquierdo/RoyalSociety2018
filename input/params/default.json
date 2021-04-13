@@ -19,6 +19,71 @@
             }
         },
         "connections": [
+            // self connections
+            {
+                "from": "SMDD",
+                "to": "SMDD",
+                "type": "chem",
+                "weight": -14.9121
+            },
+            {
+                "from": "SMDV",
+                "to": "SMDV",
+                "type": "chem",
+                "weight": -14.9121
+            },
+            {
+                "from": "RMDD",
+                "to": "RMDD",
+                "type": "chem",
+                "weight": 6.62512
+            },
+            {
+                "from": "RMDV",
+                "to": "RMDV",
+                "type": "chem",
+                "weight": 6.62512
+            },
+            // SMD conns
+            {
+                "from": "SMDD",
+                "to": "SMDV",
+                "type": "chem",
+                "weight": -11.2755
+            },
+            {
+                "from": "SMDV",
+                "to": "SMDD",
+                "type": "chem",
+                "weight": -11.2755
+            },
+            // cross conns
+            {
+                "from": "SMDD",
+                "to": "RMDV",
+                "type": "chem",
+                "weight": 14.9933
+            },
+            {
+                "from": "SMDV",
+                "to": "RMDD",
+                "type": "chem",
+                "weight": 14.9933
+            },
+            // RMD
+            {
+                "from": "RMDD",
+                "to": "RMDV",
+                "type": "chem",
+                "weight": -11.6075
+            },
+            {
+                "from": "RMDV",
+                "to": "RMDD",
+                "type": "chem",
+                "weight": -11.6075
+            },
+            // gap juncs
             {
                 "from": "SMDD",
                 "to": "RMDD",
@@ -36,66 +101,6 @@
                 "to": "RMDV",
                 "type": "ele",
                 "weight": 1.51095
-            },
-            {
-                "from": "SMDD",
-                "to": "SMDD",
-                "type": "chem",
-                "weight": -14.9121
-            },
-            {
-                "from": "SMDD",
-                "to": "SMDV",
-                "type": "chem",
-                "weight": -11.2755
-            },
-            {
-                "from": "SMDD",
-                "to": "RMDV",
-                "type": "chem",
-                "weight": 14.9933
-            },
-            {
-                "from": "SMDV",
-                "to": "SMDV",
-                "type": "chem",
-                "weight": -14.9121
-            },
-            {
-                "from": "SMDV",
-                "to": "SMDD",
-                "type": "chem",
-                "weight": -11.2755
-            },
-            {
-                "from": "SMDV",
-                "to": "RMDD",
-                "type": "chem",
-                "weight": 14.9933
-            },
-            {
-                "from": "RMDD",
-                "to": "RMDD",
-                "type": "chem",
-                "weight": 6.62512
-            },
-            {
-                "from": "RMDD",
-                "to": "RMDV",
-                "type": "chem",
-                "weight": -11.6075
-            },
-            {
-                "from": "RMDV",
-                "to": "RMDV",
-                "type": "chem",
-                "weight": 6.62512
-            },
-            {
-                "from": "RMDV",
-                "to": "RMDD",
-                "type": "chem",
-                "weight": -11.6075
             }
         ]
     },
@@ -127,53 +132,12 @@
             }
         },
         "connections": [
-            {
-                "from": "DD",
-                "to": "VDA",
-                "type": "ele",
-                "weight": 1.46108
-            },
-            {
-                "from": "DD",
-                "to": "VDP",
-                "type": "ele",
-                "weight": 1.46108
-            },
-            {
-                "from": "VBA",
-                "to": "VBP",
-                "type": "ele",
-                "weight": 0.569164
-            },
-            {
-                "from": "VDA",
-                "to": "VDP",
-                "type": "ele",
-                "weight": 0.994941
-            },
+            // self conns
             {
                 "from": "DB",
                 "to": "DB",
                 "type": "chem",
                 "weight": -14.9544
-            },
-            {
-                "from": "DB",
-                "to": "DD",
-                "type": "chem",
-                "weight": -9.79669
-            },
-            {
-                "from": "DB",
-                "to": "VDA",
-                "type": "chem",
-                "weight": 12.3531
-            },
-            {
-                "from": "DB",
-                "to": "VDP",
-                "type": "chem",
-                "weight": 12.3531
             },
             {
                 "from": "VBA",
@@ -182,22 +146,41 @@
                 "weight": -14.9544
             },
             {
-                "from": "VBA",
+                "from": "VBP",
+                "to": "VBP",
+                "type": "chem",
+                "weight": -14.9544
+            },
+            {
+                "from": "DD",
+                "to": "DD",
+                "type": "chem",
+                "weight": 1.13632
+            },
+            {
+                "from": "VDA",
                 "to": "VDA",
+                "type": "chem",
+                "weight": 1.13632
+            },
+            {
+                "from": "VDP",
+                "to": "VDP",
+                "type": "chem",
+                "weight": 1.13632
+            },
+            // DB->DD, VB->VD
+            {
+                "from": "DB",
+                "to": "DD",
                 "type": "chem",
                 "weight": -9.79669
             },
             {
                 "from": "VBA",
-                "to": "DD",
+                "to": "VDA",
                 "type": "chem",
-                "weight": 6.17657
-            },
-            {
-                "from": "VBP",
-                "to": "VBP",
-                "type": "chem",
-                "weight": -14.9544
+                "weight": -9.79669
             },
             {
                 "from": "VBP",
@@ -205,73 +188,107 @@
                 "type": "chem",
                 "weight": -9.79669
             },
+            // DB->VD
+            {
+                "from": "DB",
+                "to": "VDA",
+                "type": "chem",
+                "weight": 12.3531
+            },
+            {
+                "from": "DB",
+                "to": "VDP",
+                "type": "chem",
+                "weight": 12.3531
+            },
+            // VB->DD
+            {
+                "from": "VBA",
+                "to": "DD",
+                "type": "chem",
+                "weight": 6.17657
+            },
             {
                 "from": "VBP",
                 "to": "DD",
                 "type": "chem",
                 "weight": 6.17657
             },
+            // xD- -> yD
             {
                 "from": "DD",
-                "to": "DD",
+                "to": "VDA",
                 "type": "chem",
-                "weight": 1.13632
+                "weight": 1.6637400 
             },
+            // DD->VD
+            // maybe add connection to VDP here?
             {
                 "from": "DD",
                 "to": "VDA",
                 "type": "chem",
                 "weight": 1.66374
+            },
+            // gap juncs
+            {
+                "from": "DD",
+                "to": "VDA",
+                "type": "ele",
+                "weight": 1.46108
+            },
+            {
+                "from": "DD",
+                "to": "VDP",
+                "type": "ele",
+                "weight": 1.46108
+            },
+            // are these gap junctions supposed to be here? not on table
+            {
+                "from": "VDA",
+                "to": "VDP",
+                "type": "ele",
+                "weight": 0.994941
+            },
+            {
+                "from": "VBA",
+                "to": "VBP",
+                "type": "ele",
+                "weight": 0.569164
             }
         ],
         "connections_fwd": [
-            {
-                "from": "DD",
-                "to": "DD",
-                "type": "ele",
-                "weight": 1.13632
-            },
-            {
-                "from": "VDP",
-                "to": "DD",
-                "type": "ele",
-                "weight": 1.13632
-            },
+            // DB[i] -> DB[i+1], VB[i] -> VB[i+1]
             {
                 "from": "DB",
-                "to": "DD",
+                "to": "DB",
                 "type": "ele",
-                "weight": 1.13632
+                "weight": 0.569164
             },
             {
                 "from": "VBP",
-                "to": "DD",
+                "to": "VBA",
                 "type": "ele",
-                "weight": 1.13632
+                "weight": 0.569164
             },
+            // DD[i] -> DD[i+1], VD[i] -> VD[i+1]
             {
                 "from": "DD",
-                "to": "VDA",
+                "to": "DD",
                 "type": "ele",
-                "weight": 1.66374
+                "weight": 0.994941
             },
             {
                 "from": "VDP",
                 "to": "VDA",
                 "type": "ele",
-                "weight": 1.66374
+                "weight": 0.994941
             },
-            {
-                "from": "DB",
-                "to": "VDA",
-                "type": "ele",
-                "weight": 1.66374
-            },
+            // VB[i] -> DB[i+1]
             {
                 "from": "VBP",
-                "to": "VDA",
+                "to": "DB",
                 "type": "ele",
-                "weight": 1.66374
+                "weight": 1.10313
             }
         ]
     },
@@ -281,9 +298,9 @@
         "RMDD": 1.0,
         "RMDV": 1.0,
         "DB": 1.0,
-        "DD": -0.00105857,
         "VBA": 1.0,
         "VBP": 1.0,
+        "DD": -0.00105857,
         "VDA": -0.00105857,
         "VDP": -0.00105857
     },

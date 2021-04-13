@@ -57,8 +57,8 @@ void NervousSystem::init_NS_repeatedUnits(json & ns_data, int n_units)
     int unit_size = compute_size(ns_data["neurons"]);
     // REVIEW: connection count calculation is bugged :/
     // TODO: instead of adding the maxs together, merge the lists and take the max once
-    int max_CHEM = compute_maxconn_bidir(ns_data["connections"], CONNTYPE_CHEM) + 1.5 * compute_maxconn_bidir(ns_data["connections_fwd"], CONNTYPE_CHEM) + 1;
-    int max_ELE = compute_maxconn_bidir(ns_data["connections"], CONNTYPE_ELE) + 1.5 * compute_maxconn_bidir(ns_data["connections_fwd"], CONNTYPE_ELE);
+    int max_CHEM = 2 * compute_maxconn_bidir(ns_data["connections"], CONNTYPE_CHEM) + 2 * compute_maxconn_bidir(ns_data["connections_fwd"], CONNTYPE_CHEM) + 1;
+    int max_ELE = 2 * compute_maxconn_bidir(ns_data["connections"], CONNTYPE_ELE) + 2 * compute_maxconn_bidir(ns_data["connections_fwd"], CONNTYPE_ELE);
     
     SetCircuitSize(n_units * unit_size, max_CHEM, max_ELE);
     PRINTF_DEBUG("      >>  size: %d, max_CHEM: %d, max_ELE: %d, unit_size: %d\n", size, maxchemconns, maxelecconns, unit_size)

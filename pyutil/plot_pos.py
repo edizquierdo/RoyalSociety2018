@@ -200,7 +200,7 @@ def _get_fig_bounds(
 
 class Plotters(object):
 	@staticmethod
-	def head_pos(filename : str = 'data/run/body.dat', collision_objs_file : str = 'data/collision_objs.tsv'):
+	def head_pos(filename : str = 'data/run/body.dat', collision_objs_file : str = 'input/collision_objs.tsv'):
 		head_x = []
 		head_y = []
 		
@@ -221,8 +221,8 @@ class Plotters(object):
 	@staticmethod
 	def anim(
 			filename : str = 'data/run/body.dat',
-			collision_objs_file : str = 'data/collision_objs.tsv',
-			out_file : str = 'data/worm.mp4',
+			collision_objs_file : str = 'input/collision_objs.tsv',
+			out_file : str = 'data/run/worm.mp4',
 			arrbd_x = None,
 			arrbd_y = None,
 			limit_frames : Optional[int] = None,
@@ -295,7 +295,7 @@ class Plotters(object):
 	@staticmethod
 	def single_frame(
 			filename : str = 'data/run/body.dat',
-			collision_objs_file : str = 'data/collision_objs.tsv',
+			collision_objs_file : str = 'input/collision_objs.tsv',
 			arrbd_x = None, arrbd_y = None,
 			i_frame : int = 0,
 			figsize_scalar : float = 10.0,

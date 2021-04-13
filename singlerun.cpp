@@ -74,7 +74,10 @@ int main (int argc, const char* argv[])
         std::string(
             (std::istreambuf_iterator<char>(ifs) ),
             (std::istreambuf_iterator<char>()    )
-        )
+        ),
+        nullptr,
+        true,
+        true
     );
     PRINTF_DEBUG("> loaded params json from: %s\n", cmd["params"].as<std::string>())
     // std::cout << params.dump();
