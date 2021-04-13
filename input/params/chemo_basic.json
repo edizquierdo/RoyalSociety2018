@@ -126,7 +126,6 @@
         ]
     },
     "VentralCord": {
-        "n_units" : 6,
         "neurons": {
             "DB": {
                 "theta": 4.80699,
@@ -141,8 +140,8 @@
                 "tau": 0.502865
             },
             "VBP": {
-                "theta": -2.94785,
-                "tau": 1.67861
+                "theta": 4.80699,
+                "tau": 0.502865
             },
             "VDA": {
                 "theta": -2.94785,
@@ -155,118 +154,100 @@
         },
         "connections": [
             {
+                "from": "DD",
+                "to": "VDA",
+                "type": "ele",
+                "weight": 1.46108
+            },
+            {
+                "from": "DD",
+                "to": "VDP",
+                "type": "ele",
+                "weight": 1.46108
+            },
+            {
+                "from": "VBA",
+                "to": "VBP",
+                "type": "ele",
+                "weight": 0.569164
+            },
+            {
+                "from": "VDA",
+                "to": "VDP",
+                "type": "ele",
+                "weight": 0.994941
+            },
+            {
                 "from": "DB",
                 "to": "DB",
                 "type": "chem",
-                "weight": 1.46108
+                "weight": -14.9544
+            },
+            {
+                "from": "DB",
+                "to": "DD",
+                "type": "chem",
+                "weight": -9.79669
+            },
+            {
+                "from": "DB",
+                "to": "VDA",
+                "type": "chem",
+                "weight": 12.3531
+            },
+            {
+                "from": "DB",
+                "to": "VDP",
+                "type": "chem",
+                "weight": 12.3531
             },
             {
                 "from": "VBA",
                 "to": "VBA",
                 "type": "chem",
-                "weight": 1.46108
+                "weight": -14.9544
+            },
+            {
+                "from": "VBA",
+                "to": "VDA",
+                "type": "chem",
+                "weight": -9.79669
+            },
+            {
+                "from": "VBA",
+                "to": "DD",
+                "type": "chem",
+                "weight": 6.17657
             },
             {
                 "from": "VBP",
                 "to": "VBP",
                 "type": "chem",
-                "weight": 1.46108
-            },
-            {
-                "from": "DD",
-                "to": "DD",
-                "type": "chem",
-                "weight": 1.46108
-            },
-            {
-                "from": "VDA",
-                "to": "VDA",
-                "type": "chem",
-                "weight": 1.46108
-            },
-            {
-                "from": "VDP",
-                "to": "VDP",
-                "type": "chem",
-                "weight": 1.46108
-            },
-            {
-                "from": "VDP",
-                "to": "VDP",
-                "type": "chem",
-                "weight": 1.46108
-            },
-            {
-                "from": "DB",
-                "to": "DD",
-                "type": "chem",
-                "weight": 1.46108
-            },
-            {
-                "from": "VBA",
-                "to": "VDA",
-                "type": "chem",
-                "weight": 1.46108
+                "weight": -14.9544
             },
             {
                 "from": "VBP",
                 "to": "VDP",
                 "type": "chem",
-                "weight": 1.46108
-            },
-            {
-                "from": "DB",
-                "to": "VDA",
-                "type": "chem",
-                "weight": 1.46108
-            },
-            {
-                "from": "DB",
-                "to": "VDP",
-                "type": "chem",
-                "weight": 1.46108
-            },
-            {
-                "from": "VBA",
-                "to": "DD",
-                "type": "chem",
-                "weight": 1.46108
+                "weight": -9.79669
             },
             {
                 "from": "VBP",
                 "to": "DD",
                 "type": "chem",
-                "weight": 1.46108
+                "weight": 6.17657
+            },
+            {
+                "from": "DD",
+                "to": "DD",
+                "type": "chem",
+                "weight": 1.13632
             },
             {
                 "from": "DD",
                 "to": "VDA",
                 "type": "chem",
-                "weight": 1.46108
-            },
-            {
-                "from": "DD",
-                "to": "VDA",
-                "type": "ele",
-                "weight": 1.46108
-            },
-            {
-                "from": "DD",
-                "to": "VDP",
-                "type": "ele",
-                "weight": 1.46108
-            },
-            {
-                "from": "VDA",
-                "to": "VDP",
-                "type": "ele",
-                "weight": 1.46108
-            },
-            {
-                "from": "VBA",
-                "to": "VBP",
-                "type": "ele",
-                "weight": 1.46108
+                "weight": 1.66374
             }
         ],
         "connections_fwd": [
@@ -278,27 +259,45 @@
             },
             {
                 "from": "VDP",
-                "to": "VDA",
+                "to": "DD",
                 "type": "ele",
                 "weight": 1.13632
             },
             {
                 "from": "DB",
-                "to": "DB",
+                "to": "DD",
                 "type": "ele",
                 "weight": 1.13632
             },
             {
                 "from": "VBP",
-                "to": "VBA",
+                "to": "DD",
                 "type": "ele",
                 "weight": 1.13632
             },
             {
-                "from": "VBP",
-                "to": "DB",
+                "from": "DD",
+                "to": "VDA",
                 "type": "ele",
-                "weight": 1.13632
+                "weight": 1.66374
+            },
+            {
+                "from": "VDP",
+                "to": "VDA",
+                "type": "ele",
+                "weight": 1.66374
+            },
+            {
+                "from": "DB",
+                "to": "VDA",
+                "type": "ele",
+                "weight": 1.66374
+            },
+            {
+                "from": "VBP",
+                "to": "VDA",
+                "type": "ele",
+                "weight": 1.66374
             }
         ]
     },
