@@ -1,6 +1,8 @@
 #ifndef COLLIDE_H
 #define COLLIDE_H
 
+#include "util.h"
+
 #include <vector>
 #include <fstream>
 #include <cmath>
@@ -111,7 +113,7 @@ double dist(VecXY a, VecXY b);
 
 // the more complicated ones
 std::vector<CollisionObject> load_objects(std::string collide_file);
-void save_objects(std::string collide_file, std::vector<CollisionObject> CollObjs);
+void save_objects(std::string collide_file, std::vector<CollisionObject> & CollObjs);
 VecXY do_collide(CollisionObject obj, VecXY pos);
 
 

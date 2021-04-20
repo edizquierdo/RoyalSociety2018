@@ -95,7 +95,7 @@ std::vector<CollisionObject> load_objects(std::string collide_file)
 }
 
 
-void save_objects(std::string collide_file, std::vector<CollisionObject> CollObjs)
+void save_objects(std::string collide_file, std::vector<CollisionObject> & CollObjs)
 {
     // open file
     std::ofstream objfile(collide_file);
@@ -103,6 +103,8 @@ void save_objects(std::string collide_file, std::vector<CollisionObject> CollObj
     {
         exit(EXIT_FAILURE);
     }
+
+	PRINTF_DEBUG("    >> elements in CollObjs vec: %d\n", CollObjs.size())
 
 	for (CollisionObject obj : CollObjs)
 	{
@@ -117,7 +119,6 @@ void save_objects(std::string collide_file, std::vector<CollisionObject> CollObj
 		}
 		else if (obj.coll_type == Disc)
 		{
-
 			objfile 
 				<< "Disc" << "\t"
 				<< "\t" << obj.bound_min_x << "\t" << obj.bound_min_y 
@@ -127,6 +128,10 @@ void save_objects(std::string collide_file, std::vector<CollisionObject> CollObj
 				<< "\t" << obj.radius_inner << "\t" << obj.radius_outer
 				<< "\t" << obj.angle_min << "\t" << obj.angle_max
 				<< std::endl;
+		}
+		else
+		{
+			objfile << "NULL\n";
 		}
     }
 

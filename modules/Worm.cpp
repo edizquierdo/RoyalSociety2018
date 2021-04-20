@@ -258,14 +258,14 @@ Worm::Worm(json & params)
 
 
 
-void Worm::InitializeState(RandomState &rs, double angle, std::string collide_file)
+void Worm::InitializeState(RandomState &rs, double angle, std::vector<CollisionObject> collObjs)
 {
     PRINT_DEBUG("    > circuit state\n")
     t = 0.0;
     n.RandomizeCircuitState(-0.5, 0.5, rs);
     h.RandomizeCircuitState(-0.5, 0.5, rs);
-    PRINTF_DEBUG("    > body state\n      >> angle: %f, collision file: %s\n", angle, collide_file.c_str())
-    b.InitializeBodyState(angle, collide_file);
+    PRINTF_DEBUG("    > body state\n      >> angle: %f, collision obj count: %d\n", angle, collObjs.size())
+    b.InitializeBodyState(angle, collObjs);
     PRINT_DEBUG("    > muscle state\n")
     m.InitializeMuscleState();
 }

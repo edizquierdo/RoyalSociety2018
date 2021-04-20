@@ -77,10 +77,14 @@ int main (int argc, const char* argv[])
     // set duration
     DURATION = cmd["duration"].as<double>();;
 
+
+
     // setting up simulation
     InitializeBodyConstants();
     PRINT_DEBUG("> finished init body constants\n")
-    // load worm
+    
+    PRINT_DEBUG("> loading configs:\n")
+    PRINTF_DEBUG("  > params json from:  \t%s\n", cmd["params"].as<std::string>().c_str())
     std::ifstream ifs(cmd["params"].as<std::string>());
     json params = json::parse(
         std::string(
@@ -91,38 +95,45 @@ int main (int argc, const char* argv[])
         true,
         true
     );
-    PRINTF_DEBUG("> loaded params json from: %s\n", cmd["params"].as<std::string>().c_str())
 
-    PRINT_DEBUG("> creating worm object:\n")
-    Worm wrm(params);
-    
-    PRINT_DEBUG("> saving copies of input params\n")
-    
+    PRINTF_DEBUG("  > collision tsv from:\t%s\n", cmd["coll"].as<std::string>().c_str())
+    std::vector<CollisionObject> collObjs = load_objects(cmd["coll"].as<std::string>());
+
+    // copy configs
     {
         std::string output_dir = cmd["output"].as<std::string>();
+        PRINTF_DEBUG("> creating output dir: %s\n", output_dir.c_str())
         MKDIR(output_dir.c_str());
 
         std::string outpath_collobjs = output_dir + "coll_objs.tsv";
         std::string outpath_params = output_dir + "params.json";
 
-        PRINTF_DEBUG("  > collision objects to %s\n", outpath_collobjs.c_str())
-        save_objects(outpath_collobjs, wrm.b.CollObjs);
+        PRINTF_DEBUG("  > copying collision objects to:\t%s\n", outpath_collobjs.c_str())
+        save_objects(outpath_collobjs, collObjs);
         
-        PRINTF_DEBUG("  > params json to %s\n", outpath_params.c_str())
+        PRINTF_DEBUG("  > copying params json to:      \t%s\n", outpath_params.c_str())
         std::ofstream ofs_params(outpath_params);
         ofs_params << params.dump(1, '\t');
         ofs_params.flush();
         ofs_params.close();
     }
 
+    PRINT_DEBUG("> creating worm object:\n")
+    Worm wrm(params);
+
+
     PRINT_DEBUG("> running evaluation:\n")
     EvaluationFunction(
         wrm, 
-        rs, 
+        rs,
         cmd["angle"].as<double>(),
-        cmd["coll"].as<std::string>(),
+        collObjs,
         cmd["output"].as<std::string>()
     );
+    
+    // TODO: make this happen after worm init but before sim?
+    PRINT_DEBUG("> saving copies of input params\n")
+
     PRINT_DEBUG("> finished!\n")
     return 0;
 }
