@@ -7,10 +7,22 @@
 
 #define ENABLE_CTOR_JSON 1
 
+#ifdef _WIN32
+    #include <direct.h>
+    #define MKDIR _mkdir
+#elif defined __linux__
+    #include <sys/stat.h>
+    #define MKDIR(path) \
+        mkdir(path, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH)
+#endif
+
 #include "modules/packages/cxxopts.hpp"
 #include "modules/util.h"
+#include "modules/Collide.h"
 
 #include "main.h"
+
+// #include <filesystem>
 
 int main (int argc, const char* argv[])
 {
@@ -80,9 +92,28 @@ int main (int argc, const char* argv[])
         true
     );
     PRINTF_DEBUG("> loaded params json from: %s\n", cmd["params"].as<std::string>().c_str())
-    // std::cout << params.dump();
+
     PRINT_DEBUG("> creating worm object:\n")
     Worm wrm(params);
+    
+    PRINT_DEBUG("> saving copies of input params\n")
+    
+    {
+        std::string output_dir = cmd["output"].as<std::string>();
+        MKDIR(output_dir.c_str());
+
+        std::string outpath_collobjs = output_dir + "coll_objs.tsv";
+        std::string outpath_params = output_dir + "params.json";
+
+        PRINTF_DEBUG("  > collision objects to %s\n", outpath_collobjs.c_str())
+        save_objects(outpath_collobjs, wrm.b.CollObjs);
+        
+        PRINTF_DEBUG("  > params json to %s\n", outpath_params.c_str())
+        std::ofstream ofs_params(outpath_params);
+        ofs_params << params.dump(1, '\t');
+        ofs_params.flush();
+        ofs_params.close();
+    }
 
     PRINT_DEBUG("> running evaluation:\n")
     EvaluationFunction(

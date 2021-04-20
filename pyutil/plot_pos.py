@@ -371,7 +371,7 @@ class Plotters(object):
 			for x in names
 		}
 
-		plt.ylim(-50.0, 50.0)
+		# plt.ylim(-50.0, 50.0)
 
 		for v_name,v_arr in V.items():
 			# print(v_name, v_arr.shape, v_arr.dtype)

@@ -59,10 +59,10 @@ public:
 
     void initialize(VecXY in_foodpos, double in_chem_signal_scalar, int in_target_nrn_idx)
     {
+        enabled = true;
         foodpos = in_foodpos;
         chem_signal_scalar = in_chem_signal_scalar;
         target_nrn_idx = in_target_nrn_idx;
-        enabled = true;
     }
 
     double get_CR_input(VecXY headpos)

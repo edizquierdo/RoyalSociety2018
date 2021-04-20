@@ -290,5 +290,6 @@
     "StretchReceptors": {
         "Head_gain": -120.535,
         "VC_gain": -165.138
-    }
+    },
+    "ChemoReceptors": {}
 }

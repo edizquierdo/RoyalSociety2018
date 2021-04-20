@@ -44,7 +44,10 @@ using namespace std;
 
 
 // Global constants
-double M_PI = 3.1415926535897932384626433;
+#ifndef M_PI
+    double M_PI = 3.1415926535897932384626433;
+#endif
+
 double R[N_rods];                     // Rod radii in m
 double L_D0[N_rods];                  // Rest length of each diagonal element in m
 double L_L0[N_rods];                  // Rest length of each lateral element in m

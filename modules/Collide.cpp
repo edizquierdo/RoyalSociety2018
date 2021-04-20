@@ -95,6 +95,47 @@ std::vector<CollisionObject> load_objects(std::string collide_file)
 }
 
 
+void save_objects(std::string collide_file, std::vector<CollisionObject> CollObjs)
+{
+    // open file
+    std::ofstream objfile(collide_file);
+    if (!objfile.is_open() || !objfile.good())
+    {
+        exit(EXIT_FAILURE);
+    }
+
+	for (CollisionObject obj : CollObjs)
+	{
+		if (obj.coll_type == Box_Ax)
+		{
+			objfile 
+				<< "Box_Ax" << "\t"
+				<< "\t" << obj.bound_min_x << "\t" << obj.bound_min_y 
+				<< "\t" << obj.bound_max_x << "\t" << obj.bound_max_y 
+				<< "\t" << obj.fvec_x << "\t" << obj.fvec_y
+				<< std::endl;
+		}
+		else if (obj.coll_type == Disc)
+		{
+
+			objfile 
+				<< "Disc" << "\t"
+				<< "\t" << obj.bound_min_x << "\t" << obj.bound_min_y 
+				<< "\t" << obj.bound_max_x << "\t" << obj.bound_max_y 
+				<< "\t" << obj.centerpos_x << "\t" << obj.centerpos_y
+				<< "\t" << obj.force
+				<< "\t" << obj.radius_inner << "\t" << obj.radius_outer
+				<< "\t" << obj.angle_min << "\t" << obj.angle_max
+				<< std::endl;
+		}
+    }
+
+    // close file
+	objfile.flush();
+    objfile.close();
+}
+
+
 VecXY do_collide(CollisionObject obj, VecXY pos)
 {
 	// forces on elements

@@ -111,6 +111,7 @@ double dist(VecXY a, VecXY b);
 
 // the more complicated ones
 std::vector<CollisionObject> load_objects(std::string collide_file);
+void save_objects(std::string collide_file, std::vector<CollisionObject> CollObjs);
 VecXY do_collide(CollisionObject obj, VecXY pos);
 
 

@@ -215,9 +215,9 @@ Worm::Worm(json & params)
     );
 
     // chemosensory receptor
-    PRINT_DEBUG("  > Chemo Receptors\n")
     if (params.find("ChemoReceptors") != params.end())
     {
+        PRINT_DEBUG("  > Chemo Receptors\n")
         chemo_re.initialize(
             VecXY(
                 params["ChemoReceptors"]["foodPos"]["x"].get<double>(), 
@@ -303,7 +303,7 @@ void Worm::Step(double StepSize, double output)
     {
         h.SetNeuronExternalInput(
             chemo_re.target_nrn_idx,
-            chemo_re.get_CR_input(VecXY(b.X(0), b.Y(0)))
+            chemo_re.get_CR_input(VecXY(b.X(1), b.Y(1)))
         );
     }
 

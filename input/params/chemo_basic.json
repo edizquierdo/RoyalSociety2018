@@ -2,11 +2,11 @@
     "Head": {
         "neurons": {
             "AWA": {
-                "theta": 6.27095,
-                "tau": 0.500646
+                "theta": 0.0,
+                "tau": 0.01
             },
             "RIM": {
-                "theta": 6.27095,
+                "theta": 0.1,
                 "tau": 0.500646
             },
             "SMDD": {
@@ -44,7 +44,7 @@
                 "from": "RIM",
                 "to": "SMDV",
                 "type": "chem",
-                "weight": 0.0199558
+                "weight": 0.0
             },
             // self connections
             {
@@ -337,10 +337,10 @@
     },
     "ChemoReceptors": {
         "neuron" : "AWA",
-        "scalar" : 0.1,
+        "scalar" : 1000.0,
         "foodPos" : {
-            "x" : 0.1,
-            "y" : -0.1
+            "x" : -0.0005,
+            "y" : 0.00323
         }
     }
 }
