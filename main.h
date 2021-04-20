@@ -120,7 +120,7 @@ void curvRatio(TVector<double> &v, TVector<double> &antposcurv)
     }
 }
 
-double EvaluationFunction(Worm w, RandomState &rs, double angle, std::vector<CollisionObject> collObjs, string output_dir)
+double EvaluationFunction(Worm w, RandomState &rs, double angle, std::vector<CollisionObject> & collObjs, string output_dir)
 {
     PRINTF_DEBUG("  > opening output files in %s\n", output_dir.c_str())
     double fitness;

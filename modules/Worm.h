@@ -45,7 +45,7 @@ public:
     Worm(TVector<double> &v, double output);
     Worm(json & params);
 
-    void InitializeState(RandomState &rs, double angle, std::vector<CollisionObject> collObjs);
+    void InitializeState(RandomState &rs, double angle, std::vector<CollisionObject> & collObjs);
     void HeadStep(double StepSize, double output);
     void Step(double StepSize, double output); 
     

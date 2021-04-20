@@ -258,7 +258,7 @@ Worm::Worm(json & params)
 
 
 
-void Worm::InitializeState(RandomState &rs, double angle, std::vector<CollisionObject> collObjs)
+void Worm::InitializeState(RandomState &rs, double angle, std::vector<CollisionObject> &collObjs)
 {
     PRINT_DEBUG("    > circuit state\n")
     t = 0.0;
