@@ -360,8 +360,8 @@ class Plotters(object):
 							names_new.append(y)
 			names = names_new
 
-		if 't' in names:
-			del names['t']
+		# if 't' in names:
+		# 	del names['t']
 
 		print(data_raw.shape, fields_raw)
 

@@ -223,8 +223,10 @@ Worm::Worm(json & params)
                 params["ChemoReceptors"]["foodPos"]["x"].get<double>(), 
                 params["ChemoReceptors"]["foodPos"]["y"].get<double>()
             ),
-            params["ChemoReceptors"]["scalar"].get<double>(),
-            h.namesMap[params["ChemoReceptors"]["neuron"].get<string>()]
+            h.namesMap[params["ChemoReceptors"]["neuron"].get<string>()],
+            params["ChemoReceptors"]["alpha"].get<double>(),
+            params["ChemoReceptors"]["beta"].get<double>(),
+            params["ChemoReceptors"]["gamma"].get<double>()
         );
     }
 
@@ -303,7 +305,7 @@ void Worm::Step(double StepSize, double output)
     {
         h.SetNeuronExternalInput(
             chemo_re.target_nrn_idx,
-            chemo_re.get_CR_input(VecXY(b.X(1), b.Y(1)))
+            chemo_re.comp_sensory(VecXY(b.X(1), b.Y(1)), StepSize)
         );
     }
 

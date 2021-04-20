@@ -1,3 +1,5 @@
+#pragma once
+
 // Integration parameters
 // const double DURATION = 100.0;           // Seconds
 double DURATION = 100.0;           // Seconds

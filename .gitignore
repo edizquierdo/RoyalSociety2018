@@ -6,5 +6,8 @@ data/coll/*.tsv
 data/collision_objs.tsv
 !data/coll/demo/**
 
+*.gch
+**/*.gch
+
 __pycache__/**
 **/__pycache__/**

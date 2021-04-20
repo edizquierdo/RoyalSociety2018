@@ -53,22 +53,57 @@ public:
 class ChemoReceptor {
 public:
     VecXY foodpos;
-    double chem_signal_scalar;
     int target_nrn_idx;
     bool enabled = false;
+    // AWA consts
+    double alpha; double beta; double gamma;
 
-    void initialize(VecXY in_foodpos, double in_chem_signal_scalar, int in_target_nrn_idx)
+    // storing value of fast and slow sense
+    double F_i; double S_i;
+    double F_im1; double S_im1;
+
+    double C_ixy; double out_AWA_stim;
+
+    void initialize(VecXY in_foodpos, int in_target_nrn_idx, double in_alpha, double in_beta, double in_gamma)
     {
         enabled = true;
         foodpos = in_foodpos;
-        chem_signal_scalar = in_chem_signal_scalar;
         target_nrn_idx = in_target_nrn_idx;
+
+        alpha = in_alpha; 
+        beta = in_beta; 
+        gamma = in_gamma;
+
+        F_im1 = 0.0;
+        S_im1 = 0.0;
     }
 
-    double get_CR_input(VecXY headpos)
+    double get_concentration(VecXY headpos)
     {
         // TODO: make this more accurate -- corner distance, or full diffusion sim
-        return dist(headpos, foodpos) * chem_signal_scalar;
+        return dist(headpos, foodpos);
+    }
+
+
+    /* 
+    same function as `comp_sensory()` from 
+    https://github.com/mivanit/CE_learning/blob/main/CE_learn/wormSim.py
+    */
+    double comp_sensory(VecXY headpos, double StepSize)
+    {
+        C_ixy = get_concentration(headpos);
+
+        // iterate fast and slow sense
+		F_i = F_im1 + StepSize * ( (alpha * C_ixy) - (beta * F_im1) );
+		S_i = S_im1 + StepSize * ( gamma * (F_im1 - S_im1) );
+
+        // update stim for AWA neuron
+        out_AWA_stim = F_i - S_i;
+        
+        // update prev-timestep values
+        F_im1 = F_i; S_im1 = S_i;
+
+        return out_AWA_stim;
     }
 };
 
