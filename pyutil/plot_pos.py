@@ -377,6 +377,7 @@ class Plotters(object):
 			# print(v_name, v_arr.shape, v_arr.dtype)
 			plt.plot(T, v_arr, label = v_name)
 
+		plt.title(filename)
 		plt.legend()
 		plt.show()
 

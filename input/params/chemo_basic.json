@@ -3,14 +3,14 @@
         "neurons": {
             "AWA": {
                 "theta": 0.5,
-                "tau": 0.01
-            },
-            "CSP": {
-                "theta": 0.0,
-                "tau": 0.01
+                "tau": 0.005
             },
             "RIM": {
-                "theta": 1.0,
+                "theta": 3.5,
+                "tau": 0.01
+            },
+            "INT": {
+                "theta": 2.0,
                 "tau": 0.01
             },
             "SMDD": {
@@ -36,25 +36,31 @@
                 "from": "AWA",
                 "to": "RIM",
                 "type": "chem",
-                "weight": -0.4
-            },
-            {
-                "from": "AWA",
-                "to": "CSP",
-                "type": "ele",
-                "weight": 1.0
+                "weight": -12.0
             },
             {
                 "from": "RIM",
+                "to": "RIM",
+                "type": "chem",
+                "weight": 6.5
+            },
+            {
+                "from": "RIM",
+                "to": "INT",
+                "type": "chem",
+                "weight": -50.0
+            },
+            {
+                "from": "INT",
                 "to": "SMDD",
                 "type": "chem",
-                "weight": 0.0
+                "weight": 0.5
             },
             {
-                "from": "RIM",
+                "from": "INT",
                 "to": "SMDV",
                 "type": "chem",
-                "weight": 0.0
+                "weight": 0.5
             },
             // self connections
             {
@@ -348,7 +354,7 @@
     "ChemoReceptors": {
         "neuron" : "AWA",
         "foodPos" : {
-            "x" : -0.0005,
+            "x" : 0.0005,
             "y" : 0.00323
         },
         "alpha" : 4.0,
