@@ -2,7 +2,7 @@
     "Head": {
         "neurons": {
             "AWA": {
-                "theta": 0.0,
+                "theta": 0.5,
                 "tau": 0.01
             },
             "CSP": {
@@ -41,14 +41,8 @@
             {
                 "from": "AWA",
                 "to": "CSP",
-                "type": "chem",
-                "weight": 0.1
-            },
-            {
-                "from": "RIM",
-                "to": "CSP",
-                "type": "chem",
-                "weight": 0.0
+                "type": "ele",
+                "weight": 1.0
             },
             {
                 "from": "RIM",
@@ -359,6 +353,7 @@
         },
         "alpha" : 4.0,
         "beta" : 15.0,
-        "gamma" : 2.0
+        "gamma" : 2.0,
+        "stim_scalar" : 10000.0
     }
 }

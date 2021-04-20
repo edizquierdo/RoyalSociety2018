@@ -226,7 +226,8 @@ Worm::Worm(json & params)
             h.namesMap[params["ChemoReceptors"]["neuron"].get<string>()],
             params["ChemoReceptors"]["alpha"].get<double>(),
             params["ChemoReceptors"]["beta"].get<double>(),
-            params["ChemoReceptors"]["gamma"].get<double>()
+            params["ChemoReceptors"]["gamma"].get<double>(),
+            params["ChemoReceptors"]["stim_scalar"].get<double>()
         );
     }
 

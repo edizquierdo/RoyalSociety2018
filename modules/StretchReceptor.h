@@ -57,6 +57,7 @@ public:
     bool enabled = false;
     // AWA consts
     double alpha; double beta; double gamma;
+    double stim_scalar;
 
     // storing value of fast and slow sense
     double F_i; double S_i;
@@ -64,7 +65,7 @@ public:
 
     double C_ixy; double out_AWA_stim;
 
-    void initialize(VecXY in_foodpos, int in_target_nrn_idx, double in_alpha, double in_beta, double in_gamma)
+    void initialize(VecXY in_foodpos, int in_target_nrn_idx, double in_alpha, double in_beta, double in_gamma, double in_stim_scalar)
     {
         enabled = true;
         foodpos = in_foodpos;
@@ -73,6 +74,7 @@ public:
         alpha = in_alpha; 
         beta = in_beta; 
         gamma = in_gamma;
+        stim_scalar = in_stim_scalar;
 
         F_im1 = 0.0;
         S_im1 = 0.0;
@@ -93,6 +95,7 @@ public:
     {
         C_ixy = get_concentration(headpos);
 
+
         // iterate fast and slow sense
 		F_i = F_im1 + StepSize * ( (alpha * C_ixy) - (beta * F_im1) );
 		S_i = S_im1 + StepSize * ( gamma * (F_im1 - S_im1) );
@@ -103,7 +106,9 @@ public:
         // update prev-timestep values
         F_im1 = F_i; S_im1 = S_i;
 
-        return out_AWA_stim;
+        // PRINTF_DEBUG("\n>> C_ixy: %f, F_i: %f, S_i: %f, out_AWA_stim: %f\n", C_ixy, F_i, S_i, out_AWA_stim)
+
+        return out_AWA_stim * stim_scalar;
     }
 };
 
