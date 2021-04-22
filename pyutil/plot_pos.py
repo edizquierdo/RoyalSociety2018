@@ -1,3 +1,4 @@
+import os
 import sys
 from typing import *
 
@@ -10,40 +11,139 @@ from nptyping import NDArray
 import matplotlib
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
+from matplotlib.patches import Patch,Rectangle,Wedge
+from matplotlib.collections import PatchCollection
 
 import pandas as pd
+import json
 
+from collision_object import CollisionType,CollisionObject,read_collobjs_tsv,get_bounds
 
-from collision_object import CollisionType,read_collobjs_tsv,get_bounds
+# types
+# ==================================================
+# TODO: make this actually reference matplotlib.Axes
+Axes = TypeVar('Axes')
+Path = TypeVar('Path', str)
+AxBounds = Tuple[float,float]
+
+CoordsArr = np.dtype([ ('x','f8'), ('y','f8')])
+CoordsRotArr = np.dtype([ ('x','f8'), ('y','f8'), ('phi','f8') ])
 
 WORM_RADIUS = 80e-6
 
+
+"""
+########   #######  ##     ## ##    ## ########   ######
+##     ## ##     ## ##     ## ###   ## ##     ## ##    ##
+##     ## ##     ## ##     ## ####  ## ##     ## ##
+########  ##     ## ##     ## ## ## ## ##     ##  ######
+##     ## ##     ## ##     ## ##  #### ##     ##       ##
+##     ## ##     ## ##     ## ##   ### ##     ## ##    ##
+########   #######   #######  ##    ## ########   ######
+"""
+
 def arr_bounds(
-		arr, 
+		arr : NDArray, 
 		pad_frac : float = 0.0,
-	):
-	arr_min = np.amin(arr)
-	arr_max = np.amax(arr)
+	) -> AxBounds:
+	"""return the bounds of `arr` padded by some fraction of the range
 	
-	arr_range = arr_max - arr_min
+	[extended_summary]
+	
+	### Parameters:
+	 - `arr : NDArray`   
+	   input array
+	 - `pad_frac : float`   
+	   multiplied by range to determine padding
+	   (defaults to `0.0`)
+	
+	### Returns:
+	 - `AxBounds` 
+	   padded bounds
+	"""
+	arr_min : float = np.amin(arr)
+	arr_max : float = np.amax(arr)
+	
+	arr_range : float = arr_max - arr_min
 
 	arr_min = arr_min - arr_range * pad_frac
 	arr_max = arr_max + arr_range * pad_frac
 
 	return (arr_min, arr_max)
 
-def read_body_data(filename):
-		data_raw = np.genfromtxt(filename, delimiter = ' ', dtype = None)
+
+
+def _get_fig_bounds(
+		collobjs : List[CollisionObject],
+		arrbd_x : AxBounds = None, 
+		arrbd_y : AxBounds = None,
+		figsize_scalar : float = 6.0,
+	) -> NDArray[2, float]:
+
+	collobjs_bounds : Dict[str,float] = get_bounds(collobjs)
+
+	# set up the figure object
+	if arrbd_x is None:
+		# arrbd_x = arr_bounds(data['x'])
+		arrbd_x = (collobjs_bounds['bound_min_x'], collobjs_bounds['bound_max_x'])
+	else:
+		arrbd_x = tuple(arrbd_x)
+
+	if arrbd_y is None:
+		# arrbd_y = arr_bounds(data['y'])
+		arrbd_y = (collobjs_bounds['bound_min_y'], collobjs_bounds['bound_max_y'])
+	else:
+		arrbd_y = tuple(arrbd_y)
+	
+	print('> positional bounds:\t', arrbd_x, arrbd_y)
+
+	figsize : NDArray[2, float] = np.array([
+		arrbd_x[1] - arrbd_x[0],
+		arrbd_y[1] - arrbd_y[0],
+	])
+	
+	# print(f'> figsize:\t{figsize}')
+	figsize : NDArray[2, float] = figsize * figsize_scalar / max(figsize)
+
+	return figsize
+
+
+"""
+########  ########    ###    ########
+##     ## ##         ## ##   ##     ##
+##     ## ##        ##   ##  ##     ##
+########  ######   ##     ## ##     ##
+##   ##   ##       ######### ##     ##
+##    ##  ##       ##     ## ##     ##
+##     ## ######## ##     ## ########
+"""
+
+
+def read_body_data(filename : Path) -> NDArray[Any, CoordsRotArr]:
+		"""reads given tsv file into a numpy array
+		
+		array is a 2-D structured array of type `CoordsRotArr`
+		with `'x', 'y', 'phi'` fields for each segment
+		so essentially 3-D, where first index is timestep, second is segment, and third/field is x/y/phi
+		
+		### Parameters:
+		- `filename : Path`   
+		filename to read
+		
+		### Returns:
+		- `NDArray[Any, CoordsRotArr]` 
+		"""
+		data_raw : NDArray = np.genfromtxt(filename, delimiter = ' ', dtype = None)
 
 		data_raw = data_raw[:,1:]
 
 		n_tstep = data_raw.shape[0]
 		n_seg = int(data_raw.shape[1] / 3)
 
-		data = np.full(
+		data : NDArray[(n_tstep, n_seg), CoordsRotArr] = np.full(
 			shape = (n_tstep, n_seg),
 			fill_value = np.nan,
-			dtype = np.dtype([ ('x','f8'), ('y','f8'), ('phi','f8') ]),
+			dtype = CoordsRotArr,
 		)
 
 		for s in range(n_seg):
@@ -53,14 +153,115 @@ def read_body_data(filename):
 
 		return data
 
-def _plot_collision_boxes(ax, blocks, vecs):
-	from matplotlib.patches import Rectangle
-	from matplotlib.collections import PatchCollection
+
+def read_coll_objs_file(objs_file : str) -> Tuple[NDArray,NDArray]:
+	"""reads an old blocks/vecs style collider file
+	
+	### Parameters:
+	 - `objs_file : str`   
+	
+	### Returns:
+	 - `Tuple[NDArray,NDArray]` 
+	"""
+	blocks : list = []
+	vecs : list = []
+	
+	with open(objs_file, 'r') as fin:
+		for row in fin:
+			row_lst = row.strip().split()
+			row_lst = [ float(x) for x in row_lst ]
+
+			blocks.append([ row_lst[0:2], row_lst[2:4] ])
+			vecs.append(row_lst[4:])
+
+	return (np.array(blocks), np.array(vecs))
+
+
+def body_data_split_DV(
+		data : NDArray[Any, CoordsRotArr],
+	) -> Tuple[NDArray[Any, CoordsArr], NDArray[Any, CoordsArr]]:
+	"""splits a body data file into arrays of dorsal and ventral points
+	
+	takes in a `CoordsRotArr` (produced by `read_body_data()`)
+	and splits it into arrays of `CoordsArr` by the same method as `WormView.m`
+	by Cohen et al [1]
+
+	```matlab
+	R = D/2.0*abs(sin(acos(((0:Nbar-1)-NSEG./2.0)./(NSEG/2.0 + 0.2))));`
+	```
+	
+	### Parameters:
+	 - `data : NDArray[Any, CoordsRotArr]`   
+	   [description]
+	
+	### Returns:
+	 - `Tuple[NDArray[Any, CoordsArr], NDArray[Any, CoordsArr]]` 
+	   [description]
+
+	### References
+	 - [1] Boyle, J. H., Berri, S. & Cohen, N. Gait Modulation in C. elegans: An Integrated Neuromechanical Model. Front. Comput. Neurosci. 6, (2012).
+	 	https://www.frontiersin.org/articles/10.3389/fncom.2012.00010/full
+
+	"""
+	n_tstep : int = data.shape[0]
+	n_seg : int = data.shape[1]
+
+	worm_thickness : float = (
+		WORM_RADIUS / 2.0 * abs(
+			np.sin(np.arccos(
+				((np.linspace(0,n_seg,n_seg)) - n_seg / 2.0) 
+				/ ( n_seg / 2.0 + 0.2)
+			))
+		)
+	)
+
+	data_Dorsal : NDArray[(n_tstep, n_seg), CoordsArr] = np.full(
+		shape = (n_tstep, n_seg),
+		fill_value = np.nan,
+		dtype = CoordsArr,
+	)
+
+	data_Ventral : NDArray[(n_tstep, n_seg), CoordsArr] = np.full(
+		shape = (n_tstep, n_seg),
+		fill_value = np.nan,
+		dtype = CoordsArr,
+	)
+
+	# OPTIMIZE: this bit can be vectorized
+	for t in range(n_tstep):
+		dX : float = worm_thickness * np.cos(data[t]['phi'])
+		dY : float = worm_thickness * np.sin(data[t]['phi'])
+		data_Dorsal[t]['x'] = data[t]['x'] + dX
+		data_Dorsal[t]['y'] = data[t]['y'] + dY   
+		data_Ventral[t]['x'] = data[t]['x'] - dX   
+		data_Ventral[t]['y'] = data[t]['y'] - dY 
+
+	return (data_Dorsal, data_Ventral)
+
+
+"""
+        ########  ##        #######  ########
+        ##     ## ##       ##     ##    ##
+        ##     ## ##       ##     ##    ##
+        ########  ##       ##     ##    ##
+        ##        ##       ##     ##    ##
+        ##        ##       ##     ##    ##
+####### ##        ########  #######     ##
+"""
+
+def _plot_collision_boxes(ax : Axes, blocks : list, vecs : list):
+	"""plots old-stype collision boxes
+
+	### Parameters:
+	 - `ax : Axes`   
+	 - `blocks : list`   
+	 - `vecs : list`   
+	"""
 
 	print(blocks)
 	print(vecs)
 
-	plot_boxes = []
+	plot_boxes : List[Path] = []
 
 	for bl in blocks:
 		plot_boxes.append(Rectangle(
@@ -70,7 +271,7 @@ def _plot_collision_boxes(ax, blocks, vecs):
 			fill = True,
 		))
 
-	pc = PatchCollection(
+	pc : PatchCollection = PatchCollection(
 		plot_boxes, 
 		facecolor = 'red', 
 		alpha = 0.5,
@@ -79,11 +280,17 @@ def _plot_collision_boxes(ax, blocks, vecs):
 
 	ax.add_collection(pc)
 
-def _plot_collobjs(ax, collobjs):
-	from matplotlib.patches import Rectangle,Wedge
-	from matplotlib.collections import PatchCollection
 
-	plot_objs = []
+def _plot_collobjs(ax : Axes, collobjs : Path):
+	"""reads collision objects from a tsv file and plots them on `ax`
+	
+	### Parameters:
+	 - `ax : Axes`   
+	   matplotlib axes object
+	 - `collobjs : Path`   
+	   tsv file of collision objects (the kind where first entry is collider type)
+	"""
+	plot_objs : List[Patch] = []
 
 	for obj in collobjs:
 		if obj.coll_type == CollisionType.Box_Ax:
@@ -104,7 +311,7 @@ def _plot_collobjs(ax, collobjs):
 				fill = True,
 			))
 
-	pc = PatchCollection(
+	pc : PatchCollection = PatchCollection(
 		plot_objs, 
 		facecolor = 'red', 
 		alpha = 0.5,
@@ -114,118 +321,159 @@ def _plot_collobjs(ax, collobjs):
 	ax.add_collection(pc)
 
 
-def read_coll_objs_file(objs_file : str):
-	blocks = []
-	vecs = []
+
+
+
+def _plot_foodPos(ax : Axes, params : Path, fmt = 'bo'):
+	with open(params, 'r') as fin:
+		params_data : dict = json.load(fin)
+		if "ChemoReceptor" in params_data:
+			foodpos_x : float = float(params_data["ChemoReceptors"]["foodPos"]["x"])
+			foodpos_y : float = float(params_data["ChemoReceptors"]["foodPos"]["y"])
 	
-	with open(objs_file, 'r') as fin:
-		for row in fin:
-			row_lst = row.strip().split()
-			row_lst = [ float(x) for x in row_lst ]
-
-			blocks.append([ row_lst[0:2], row_lst[2:4] ])
-			vecs.append(row_lst[4:])
-
-	return (np.array(blocks), np.array(vecs))
-
-
-def body_data_split_DV(data):
-	n_tstep = data.shape[0]
-	n_seg = data.shape[1]
-
-	worm_thickness = (
-		WORM_RADIUS / 2.0 * abs(
-			np.sin(np.arccos(
-				((np.linspace(0,n_seg,n_seg)) - n_seg / 2.0) 
-				/ ( n_seg / 2.0 + 0.2)
-			))
-		)
-	)
-
-	data_Dorsal = np.full(
-		shape = (n_tstep, n_seg),
-		fill_value = np.nan,
-		dtype = np.dtype([ ('x','f8'), ('y','f8')]),
-	)
-
-	data_Ventral = np.full(
-		shape = (n_tstep, n_seg),
-		fill_value = np.nan,
-		dtype = np.dtype([ ('x','f8'), ('y','f8')]),
-	)
-
-	for t in range(n_tstep):
-		dX = worm_thickness * np.cos(data[t]['phi'])
-		dY = worm_thickness * np.sin(data[t]['phi'])
-		data_Dorsal[t]['x'] = data[t]['x'] + dX
-		data_Dorsal[t]['y'] = data[t]['y'] + dY   
-		data_Ventral[t]['x'] = data[t]['x'] - dX   
-		data_Ventral[t]['y'] = data[t]['y'] - dY 
-
-	return (data_Dorsal, data_Ventral)
+	ax.plot(foodpos_x, foodpos_y, fmt)
 
 
 
-def _get_fig_bounds(
-		collobjs,
-		arrbd_x = None, 
-		arrbd_y = None,
+"""
+ ######  ######## ######## ##     ## ########
+##    ## ##          ##    ##     ## ##     ##
+##       ##          ##    ##     ## ##     ##
+ ######  ######      ##    ##     ## ########
+      ## ##          ##    ##     ## ##
+##    ## ##          ##    ##     ## ##
+ ######  ########    ##     #######  ##
+"""
+
+
+def _draw_setup(
+		rootdir : Path = 'data/run/',
+		bodydat : Path = 'body.dat',
+		collobjs : Path = 'coll_objs.tsv',
+		params : Optional[Path] = 'params.json',
+		limit_frames : Optional[int] = None,
 		figsize_scalar : float = 6.0,
 	):
-	collobjs_bounds = get_bounds(collobjs)
 
-	# set up the figure object
-	if arrbd_x is None:
-		# arrbd_x = arr_bounds(data['x'])
-		arrbd_x = (collobjs_bounds['bound_min_x'], collobjs_bounds['bound_max_x'])
+	# getting the data
+	# ==============================
+
+	# append directory to paths
+	bodydat = rootdir + bodydat
+	collobjs = rootdir + collobjs
+	params = rootdir + params if params is not None else None
+
+	# read worm body
+	data : NDArray[Any, CoordsRotArr] = read_body_data(bodydat)
+	if limit_frames is not None:
+		data = data[:limit_frames]
+
+	# read collision objects
+	if os.path.isfile(collobjs):
+		lst_collision_objects : List[CollisionObject] = read_collobjs_tsv(collobjs)
 	else:
-		arrbd_x = tuple(arrbd_x)
+		print(f'  >> WARNING: could not find file, skipping: {collobjs}')
+		lst_collision_objects : List[CollisionObject] = list()
+		
 
-	if arrbd_y is None:
-		# arrbd_y = arr_bounds(data['y'])
-		arrbd_y = (collobjs_bounds['bound_min_y'], collobjs_bounds['bound_max_y'])
-	else:
-		arrbd_y = tuple(arrbd_y)
+	# set up figure things
+	# ==============================
+	arrbd_x = arr_bounds()
+	arrbd_y = arr_bounds()
 	
-	print('> positional bounds:\t', arrbd_x, arrbd_y)
+	figsize : NDArray[2, float] = _get_fig_bounds(lst_collision_objects, arrbd_x, arrbd_y, figsize_scalar)
 
-	figsize = np.array([
-		arrbd_x[1] - arrbd_x[0],
-		arrbd_y[1] - arrbd_y[0],
-	])
+	print(f'> figsize:\t{figsize}')
+	fig, ax = plt.subplots(1, 1, figsize = figsize)
+
+	# fix the scaling
+	ax.axis('equal')
+
+	# plot collision objects
+	if collobjs is not None:
+		_plot_collobjs(ax, lst_collision_objects)
 	
-	# print(f'> figsize:\t{figsize}')
-	figsize = figsize * figsize_scalar / max(figsize)
+	# plot food position
+	if params is not None:
+		#  and os.path.isfile(params):
+		_plot_foodPos(ax, params)
 
-	return figsize
+
+
 
 
 
 class Plotters(object):
+	"""
+	##     ## ########    ###    ########
+	##     ## ##         ## ##   ##     ##
+	##     ## ##        ##   ##  ##     ##
+	######### ######   ##     ## ##     ##
+	##     ## ##       ######### ##     ##
+	##     ## ##       ##     ## ##     ##
+	##     ## ######## ##     ## ########
+	"""
 	@staticmethod
-	def head_pos(filename : str = 'data/run/body.dat', collision_objs_file : str = 'input/collision_objs.tsv'):
-		head_x = []
-		head_y = []
-		
-		with open(filename, 'r') as fin:
-			for line in fin:
-				xy_temp = line.split()[1:3]
-				head_x.append(float(xy_temp[0]))
-				head_y.append(float(xy_temp[1]))
+	def pos(
+			rootdir : Path = 'data/run/',
+			bodydat : Path = 'body.dat',
+			collobjs : Path = 'coll_objs.tsv',
+			params : Optional[Path] = 'params.json',
+			idxs : Tuple[int,int] = (1,2),
+		):
+		# append directory
+		bodydat = rootdir + bodydat
+		collobjs = rootdir + collobjs
+		params = rootdir + params if params is not None else None
 
+		# head_x = []
+		# head_y = []
+		# with open(bodydat, 'r') as fin:
+		# 	for line in fin:
+		# 		xy_temp = line.split()[ idxs[0] : idxs[1]+1 ]
+		# 		head_x.append(float(xy_temp[0]))
+		# 		head_y.append(float(xy_temp[1]))
+		
+		# read data
+		data_raw : NDArray = np.genfromtxt(bodydat, dtype = float, delimeter = ' ')
+
+		head_x : NDArray[data_raw.shape[0], float] = data_raw[:,idxs[0]]
+		head_y : NDArray[data_raw.shape[0], float] = data_raw[:,idxs[1]]
+
+		# set up plotting
 		fig, ax = plt.subplots(1,1)
-		_plot_collobjs(ax, read_collobjs_tsv(collision_objs_file))
+
+		# plot collision objects
+		if collobjs is not None:
+			_plot_collobjs(ax, read_collobjs_tsv(collobjs))
+		
+		# plot food position
+		if params is not None:
+			#  and os.path.isfile(params):
+			_plot_foodPos(ax, params)
 
 		print(len(head_x), len(head_y))
 		plt.axis('equal')
 		plt.plot(head_x, head_y)
 		plt.show()
 
+	"""
+	   ###    ##    ## #### ##     ##
+	  ## ##   ###   ##  ##  ###   ###
+	 ##   ##  ####  ##  ##  #### ####
+	##     ## ## ## ##  ##  ## ### ##
+	######### ##  ####  ##  ##     ##
+	##     ## ##   ###  ##  ##     ##
+	##     ## ##    ## #### ##     ##
+	"""
+
 	@staticmethod
 	def anim(
-			filename : str = 'data/run/body.dat',
-			collision_objs_file : str = 'input/collision_objs.tsv',
-			out_file : str = 'data/run/worm.mp4',
+			rootdir : Path = 'data/run/',
+			bodydat : Path = 'body.dat',
+			collobjs : Path = 'coll_objs.tsv',
+			params : Optional[Path] = 'params.json',
+			output : Path = 'worm.mp4',
 			arrbd_x = None,
 			arrbd_y = None,
 			limit_frames : Optional[int] = None,
@@ -235,20 +483,27 @@ class Plotters(object):
 		https://towardsdatascience.com/animations-with-matplotlib-d96375c5442c
 		credit to the above for info on how to use FuncAnimation
 		"""
+		# append directory
+		bodydat = rootdir + bodydat
+		collobjs = rootdir + collobjs
+		output = rootdir + output
+		params = rootdir + params if params is not None else None
+
 		# idk what this does tbh
 		matplotlib.use("Agg")
 		
 		# read the data
-		data = read_body_data(filename)
+		data : NDArray[Any, CoordsRotArr] = read_body_data(bodydat)
+
 		if limit_frames is not None:
 			data = data[:limit_frames]
 
 		# process it
 		data_D, data_V = body_data_split_DV(data)
 
-		collobjs = read_collobjs_tsv(collision_objs_file)
+		lst_collision_objects : List[CollisionObject] = read_collobjs_tsv(collobjs)
 		
-		figsize = _get_fig_bounds(collobjs, arrbd_x, arrbd_y, figsize_scalar)
+		figsize : NDArray[2, float] = _get_fig_bounds(lst_collision_objects, arrbd_x, arrbd_y, figsize_scalar)
 
 		print(f'> figsize:\t{figsize}')
 		fig, ax = plt.subplots(1, 1, figsize = figsize)
@@ -257,11 +512,10 @@ class Plotters(object):
 		ax.axis('equal')
 
 		# draw the objects
-		_plot_collobjs(ax, collobjs)
+		_plot_collobjs(ax, lst_collision_objects)
 		
 		# Set up formatting for the movie files
-		Writer = animation.writers['ffmpeg']
-		writer = Writer(fps=30, metadata=dict(artist='Me'), bitrate=1800)
+		writer : animation.FFMpegWriter = animation.writers['ffmpeg'](fps=30, metadata=dict(artist='Me'), bitrate=1800)
 
 		# this function gets called on each frame
 		def anim_update(i, line_D, line_V):
@@ -285,33 +539,50 @@ class Plotters(object):
 			fargs = (line_D, line_V),
 			frames = data.shape[0],
 			interval = 50, 
-			blit=True,
+			blit = True,
 		)
 
-		print(f'> animation created, saving to file `{out_file}`')
+		print(f'> animation created, saving to file `{output}`')
 
 		# save it
-		line_ani.save(out_file, writer = writer)
+		line_ani.save(output, writer = writer)
 
 		print('\n\n> done saving!')
 
+	"""
+	######## ########     ###    ##     ## ########
+	##       ##     ##   ## ##   ###   ### ##
+	##       ##     ##  ##   ##  #### #### ##
+	######   ########  ##     ## ## ### ## ######
+	##       ##   ##   ######### ##     ## ##
+	##       ##    ##  ##     ## ##     ## ##
+	##       ##     ## ##     ## ##     ## ########
+	"""
+
 	@staticmethod
 	def single_frame(
-			filename : str = 'data/run/body.dat',
-			collision_objs_file : str = 'input/collision_objs.tsv',
+			rootdir : Path = 'data/run/',
+			bodydat : Path = 'body.dat',
+			collobjs : Path = 'coll_objs.tsv',
+			params : Optional[Path] = 'params.json',
 			arrbd_x = None, arrbd_y = None,
 			i_frame : int = 0,
 			figsize_scalar : float = 10.0,
 		):
+		# append directory
+		bodydat = rootdir + bodydat
+		collobjs = rootdir + collobjs
+		params = rootdir + params if params is not None else None
+
 		# read the data
-		data = read_body_data(filename)
+		data = read_body_data(bodydat)
 		data_i = np.array([ data[i_frame] ])
 
 		# process it
 		data_D, data_V = body_data_split_DV(data_i)
 
-		collobjs = read_collobjs_tsv(collision_objs_file)
-		figsize = _get_fig_bounds(collobjs, arrbd_x, arrbd_y, figsize_scalar)
+		lst_collision_objects = read_collobjs_tsv(collobjs)
+		figsize = _get_fig_bounds(lst_collision_objects, arrbd_x, arrbd_y, figsize_scalar)
 
 		print(f'> figsize:\t{figsize}')
 		fig, ax = plt.subplots(1, 1, figsize = figsize)
@@ -320,7 +591,7 @@ class Plotters(object):
 		ax.axis('equal')
 
 		# draw the objects
-		_plot_collobjs(ax, collobjs)
+		_plot_collobjs(ax, lst_collision_objects)
 		
 		# set up the base worm
 		line_D, = ax.plot(data_D[0]['x'], data_D[0]['y'], 'r-')

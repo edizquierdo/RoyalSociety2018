@@ -182,8 +182,8 @@ class CollisionObject(object):
 
 
 
-def get_bounds(collobjs : List[CollisionObject]):
-	bounds = {
+def get_bounds(collobjs : List[CollisionObject]) -> Dict[str,float]:
+	bounds : Dict[str,float] = {
 		'bound_min_x' : float('inf'),
 		'bound_min_y' : float('inf'),
 		'bound_max_x' : -float('inf'),
