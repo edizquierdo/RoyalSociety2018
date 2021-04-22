@@ -17,15 +17,18 @@ from matplotlib.collections import PatchCollection
 import pandas as pd
 import json
 
-from collision_object import CollisionType,CollisionObject,read_collobjs_tsv,get_bounds
+from collision_object import (
+	Path,
+	CollisionType,CollisionObject,
+	read_collobjs_tsv,
+	BoundingBox,AxBounds,BOUNDS_TEMPLATE,
+	get_bounds,get_bbox_ranges,pad_BoundingBox,
+	_bounds_tuples_to_bbox,_combine_bounds,
+)
 
 # types
 # ==================================================
-# TODO: make this actually reference matplotlib.Axes
-Axes = TypeVar('Axes')
-Path = TypeVar('Path', str)
-AxBounds = Tuple[float,float]
-
+Axes = TypeVar('Axes') # TODO: make this actually reference matplotlib.Axes
 CoordsArr = np.dtype([ ('x','f8'), ('y','f8')])
 CoordsRotArr = np.dtype([ ('x','f8'), ('y','f8'), ('phi','f8') ])
 
@@ -106,6 +109,16 @@ def _get_fig_bounds(
 	figsize : NDArray[2, float] = figsize * figsize_scalar / max(figsize)
 
 	return figsize
+
+
+def _get_fig_bounds_box(
+		bounds : BoundingBox,
+		figsize_scalar : float = 6.0,
+	) -> NDArray[2, float]:
+
+	figsize : NDArray[2, float] = np.array(list(get_bbox_ranges(bounds)))
+
+	return figsize * figsize_scalar / max(figsize)
 
 
 """
@@ -353,18 +366,60 @@ def _draw_setup(
 		params : Optional[Path] = 'params.json',
 		limit_frames : Optional[int] = None,
 		figsize_scalar : float = 6.0,
-	):
+		bounds : Optional[BoundingBox] = None,
+		pad_frac : float = 0.0,
+	) -> Tuple[
+		plt.figure, Axes, 
+		NDArray[(int,int), CoordsRotArr],
+		BoundingBox,
+	]:
+	"""sets up figure for drawing the worm
+	
+	- calculates bounding boxes (with padding)
+	- sets up a scaled figure object
+	- plots objects and food
+	
+	### Parameters:
+	 - `rootdir : Path`   
+		prepended to all other paths
+	   (defaults to `'data/run/'`)
+	 - `bodydat : Path`   
+	   tsv of body data
+	   (defaults to `'body.dat'`)
+	 - `collobjs : Path`   
+	   special tsv of collision objects
+	   (defaults to `'coll_objs.tsv'`)
+	 - `params : Optional[Path]`   
+	   json of parameters, namely food position
+	   (defaults to `'params.json'`)
+	 - `limit_frames : Optional[int]`   
+	   will trim data only up to this frame (also affects bounds)
+	   (defaults to `None`)
+	 - `figsize_scalar : float`   
+	   sclar for figure size
+	   (defaults to `6.0`)
+	 - `bounds : Optional[BoundingBox]`   
+	   manually specify bounds. if `None`, auto-generated
+	   (defaults to `None`)
+	 - `pad_frac : float`   
+	   if auto generating bounds, pad the box by this fraction of the range on all sides
+	   (defaults to `1.0`)
+	
+	### Returns:
+	 - `Tuple[plt.figure, Axes, NDArray[(int,int), CoordsRotArr],BoundingBox]` 
+	   returns figure (fig and ax objects), data, and bounding box of worm and objects
+	"""
 
 	# getting the data
 	# ==============================
 
-	# append directory to paths
+	# prepend directory to paths
 	bodydat = rootdir + bodydat
 	collobjs = rootdir + collobjs
 	params = rootdir + params if params is not None else None
 
 	# read worm body
-	data : NDArray[Any, CoordsRotArr] = read_body_data(bodydat)
+	data : NDArray[(int,int), CoordsRotArr] = read_body_data(bodydat)
 	if limit_frames is not None:
 		data = data[:limit_frames]
 
@@ -376,18 +431,38 @@ def _draw_setup(
 		lst_collision_objects : List[CollisionObject] = list()
 		
 
+	# get bounding boxes for contents
+	# ==============================
+
+	# get bounds
+	bounds_objs : BoundingBox = get_bounds(collobjs)
+	bounds_worm : BoundingBox = _combine_bounds([
+		_bounds_tuples_to_bbox(arr_bounds(data[:,1]), arr_bounds(data[:,2])),
+		_bounds_tuples_to_bbox(arr_bounds(data[:,-3]), arr_bounds(data[:,-2])),
+	])
+
+	# if no bounds given, replace with auto generated ones
+	if bounds is None:
+		bounds = _combine_bounds([bounds_objs, bounds_worm])
+
+		# pad bounds
+		bounds = pad_BoundingBox(bounds, pad_frac)
+
 	# set up figure things
 	# ==============================
-	arrbd_x = arr_bounds()
-	arrbd_y = arr_bounds()
-	
-	figsize : NDArray[2, float] = _get_fig_bounds(lst_collision_objects, arrbd_x, arrbd_y, figsize_scalar)
 
+	# get the figure size from the bounding box
+	figsize : NDArray[2, float] = _get_fig_bounds_box(bounds, figsize_scalar)
+
+	# create the figure itself
 	print(f'> figsize:\t{figsize}')
 	fig, ax = plt.subplots(1, 1, figsize = figsize)
 
 	# fix the scaling
 	ax.axis('equal')
+
+	# plot preliminaries
+	# ==============================
 
 	# plot collision objects
 	if collobjs is not None:
@@ -398,6 +473,11 @@ def _draw_setup(
 		#  and os.path.isfile(params):
 		_plot_foodPos(ax, params)
 
+	return (
+		fig,ax,
+		data,
+		bounds,
+	)
 
 
 
