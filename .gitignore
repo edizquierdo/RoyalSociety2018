@@ -9,5 +9,8 @@ data/collision_objs.tsv
 *.gch
 **/*.gch
 
+*.pyc
+**/*.pyc
 __pycache__/**
 **/__pycache__/**
+pyutil/__pycache__

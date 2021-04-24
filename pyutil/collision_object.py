@@ -173,6 +173,14 @@ class CollisionObject(object):
 	def deserialize_tsv(line : str, delim = '\t'):
 		line_lst = line.split(delim)
 
+		# HACK: at some point, the C++ code was producing collision object tsv
+		# 	files with an extra tab put in, meaning there was an extra empty 
+		# 	string in every line when we split by tabs. hence, this line exists
+		# 	to deal with those files. it's safe to remove if you are only 
+		# 	dealing with freshly generated files
+		while ('' in line_lst):
+			line_lst.remove('')
+
 		# read the collision type and the list of attributes
 		coll_type : CollisionType = CollisionType[line_lst[0]]
 		attrs_lst = CollisionObject.get_attr_list(coll_type)

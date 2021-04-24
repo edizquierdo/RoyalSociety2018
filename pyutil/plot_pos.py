@@ -31,6 +31,7 @@ from collision_object import (
 Axes = TypeVar('Axes') # TODO: make this actually reference matplotlib.Axes
 CoordsArr = np.dtype([ ('x','f8'), ('y','f8')])
 CoordsRotArr = np.dtype([ ('x','f8'), ('y','f8'), ('phi','f8') ])
+OptInt = Optional[int]
 
 WORM_RADIUS = 80e-6
 
@@ -371,7 +372,7 @@ def _draw_setup(
 		bodydat : Path = 'body.dat',
 		collobjs : Path = 'coll_objs.tsv',
 		params : Optional[Path] = 'params.json',
-		limit_frames : Optional[int] = None,
+		time_window : Tuple[OptInt,OptInt] = (None,None),
 		figsize_scalar : Optional[float] = None,
 		bounds : Optional[BoundingBox] = None,
 		pad_frac : Optional[float] = None,
@@ -399,9 +400,9 @@ def _draw_setup(
 	 - `params : Optional[Path]`   
 	   json of parameters, namely food position
 	   (defaults to `'params.json'`)
-	 - `limit_frames : Optional[int]`   
-	   will trim data only up to this frame (also affects bounds)
-	   (defaults to `None`)
+	 - `time_window : Tuple[OptInt,OptInt]`   
+	   will only preserve data between these two timesteps (also affects bounds)
+	   (defaults to `(None,None)`)
 	 - `figsize_scalar : float`   
 	   sclar for figure size
 	   (defaults to `6.0`)
@@ -434,8 +435,9 @@ def _draw_setup(
 
 	# read worm body
 	data : NDArray[(int,int), CoordsRotArr] = read_body_data(bodydat)
-	if limit_frames is not None:
-		data = data[:limit_frames]
+	print(f'> raw data stats: shape = {data.shape}, \t dtype = {data.dtype}')
+	# trim
+	data = data[ time_window[0] : time_window[1] ]
 
 	# read collision objects
 	lst_collision_objects : List[CollisionObject] = list()
@@ -448,17 +450,12 @@ def _draw_setup(
 	# get bounding boxes for contents
 	# ==============================
 
-	print(data.shape, data.dtype)
-	print('test',bounds)
-
 	# get bounds
 	bounds_objs : BoundingBox = get_bounds(lst_collision_objects)
 	bounds_worm : BoundingBox = _combine_bounds([
 		_bounds_tuples_to_bbox(arr_bounds(data['x'][:,0]), arr_bounds(data['y'][:,0])),
 		_bounds_tuples_to_bbox(arr_bounds(data['x'][:,-1]), arr_bounds(data['x'][:,-1])),
 	])
-
-	print(bounds_objs,bounds_worm)
 
 	# if no bounds given, replace with auto generated ones
 	if bounds is None:
@@ -521,7 +518,7 @@ class Plotters(object):
 			bodydat : Path = 'body.dat',
 			collobjs : Path = 'coll_objs.tsv',
 			params : Optional[Path] = 'params.json',
-			limit_frames : Optional[int] = None,
+			time_window : Tuple[OptInt,OptInt] = (None,None),
 			figsize_scalar : Optional[float] = None,
 			pad_frac : Optional[float] = None,
 			# args specific to this plotter
@@ -529,12 +526,12 @@ class Plotters(object):
 			show : bool = True,
 		):
 
-		fix,ax,data,bounds = _draw_setup(
+		fig,ax,data,bounds = _draw_setup(
 			rootdir = rootdir,
 			bodydat = bodydat,
 			collobjs = collobjs,
 			params = params,
-			limit_frames = limit_frames,
+			time_window = time_window,
 			figsize_scalar = figsize_scalar,
 			pad_frac = figsize_scalar,
 		)
@@ -542,7 +539,7 @@ class Plotters(object):
 		head_data : NDArray[data.shape[0], CoordsRotArr] = data[:,idx]
 
 		print(head_data.shape, head_data.dtype)
-		plt.plot(head_data['x'], head_data['y'])
+		ax.plot(head_data['x'], head_data['y'])
 
 		if show:
 			plt.show()
@@ -564,48 +561,36 @@ class Plotters(object):
 			collobjs : Path = 'coll_objs.tsv',
 			params : Optional[Path] = 'params.json',
 			output : Path = 'worm.mp4',
-			arrbd_x = None,
-			arrbd_y = None,
-			limit_frames : Optional[int] = None,
+			time_window : Tuple[OptInt,OptInt] = (None,None),
 			figsize_scalar : float = 6.0,
+			fps : int = 30, bitrate : int = 1800,
 		):
 		"""
 		https://towardsdatascience.com/animations-with-matplotlib-d96375c5442c
 		credit to the above for info on how to use FuncAnimation
 		"""
-		# append directory
-		bodydat = rootdir + bodydat
-		collobjs = rootdir + collobjs
 		output = rootdir + output
-		params = rootdir + params if params is not None else None
-
 		# idk what this does tbh
 		matplotlib.use("Agg")
 		
-		# read the data
-		data : NDArray[Any, CoordsRotArr] = read_body_data(bodydat)
+		fig,ax,data,bounds = _draw_setup(
+			rootdir = rootdir,
+			bodydat = bodydat,
+			collobjs = collobjs,
+			params = params,
+			time_window = time_window,
+			figsize_scalar = figsize_scalar,
+			pad_frac = figsize_scalar,
+		)
 
-		if limit_frames is not None:
-			data = data[:limit_frames]
-
-		# process it
 		data_D, data_V = body_data_split_DV(data)
-
-		lst_collision_objects : List[CollisionObject] = read_collobjs_tsv(collobjs)
-		
-		figsize : NDArray[2, float] = _get_fig_bounds(lst_collision_objects, arrbd_x, arrbd_y, figsize_scalar)
-
-		print(f'> figsize:\t{figsize}')
-		fig, ax = plt.subplots(1, 1, figsize = figsize)
-
-		# fix the scaling
-		ax.axis('equal')
-
-		# draw the objects
-		_plot_collobjs(ax, lst_collision_objects)
 		
 		# Set up formatting for the movie files
-		writer : animation.FFMpegWriter = animation.writers['ffmpeg'](fps=30, metadata=dict(artist='Me'), bitrate=1800)
+		writer : animation.FFMpegWriter = animation.writers['ffmpeg'](
+			fps = fps, 
+			metadata = dict(artist='Me'),
+			bitrate = bitrate,
+		)
 
 		# this function gets called on each frame
 		def anim_update(i, line_D, line_V):
@@ -658,41 +643,27 @@ class Plotters(object):
 			arrbd_x = None, arrbd_y = None,
 			i_frame : int = 0,
 			figsize_scalar : float = 10.0,
+			show : bool = True,
 		):
-		# append directory
-		bodydat = rootdir + bodydat
-		collobjs = rootdir + collobjs
-		params = rootdir + params if params is not None else None
+		
+		fig,ax,data,bounds = _draw_setup(
+			rootdir = rootdir,
+			bodydat = bodydat,
+			collobjs = collobjs,
+			params = params,
+			time_window = (i_frame, i_frame+1),
+			figsize_scalar = figsize_scalar,
+			pad_frac = figsize_scalar,
+		)
 
-		# read the data
-		data = read_body_data(bodydat)
-		data_i = np.array([ data[i_frame] ])
-
-		# process it
-		data_D, data_V = body_data_split_DV(data_i)
-
-		lst_collision_objects = read_collobjs_tsv(collobjs)
-		figsize = _get_fig_bounds(lst_collision_objects, arrbd_x, arrbd_y, figsize_scalar)
-
-		print(f'> figsize:\t{figsize}')
-		fig, ax = plt.subplots(1, 1, figsize = figsize)
-
-		# fix the scaling
-		ax.axis('equal')
-
-		# draw the objects
-		_plot_collobjs(ax, lst_collision_objects)
+		data_D, data_V = body_data_split_DV(data)
 		
 		# set up the base worm
 		line_D, = ax.plot(data_D[0]['x'], data_D[0]['y'], 'r-')
 		line_V, = ax.plot(data_V[0]['x'], data_V[0]['y'], 'b-')
 
-		plt.show()
-
-		print('> finished setup!')
-
-
-
+		if show:
+			plt.show()
 
 
 if __name__ == '__main__':
