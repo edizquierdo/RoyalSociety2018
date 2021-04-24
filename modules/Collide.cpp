@@ -111,7 +111,7 @@ void save_objects(std::string collide_file, std::vector<CollisionObject> & CollO
 		if (obj.coll_type == Box_Ax)
 		{
 			objfile 
-				<< "Box_Ax" << "\t"
+				<< "Box_Ax"
 				<< "\t" << obj.bound_min_x << "\t" << obj.bound_min_y 
 				<< "\t" << obj.bound_max_x << "\t" << obj.bound_max_y 
 				<< "\t" << obj.fvec_x << "\t" << obj.fvec_y
@@ -120,7 +120,7 @@ void save_objects(std::string collide_file, std::vector<CollisionObject> & CollO
 		else if (obj.coll_type == Disc)
 		{
 			objfile 
-				<< "Disc" << "\t"
+				<< "Disc"
 				<< "\t" << obj.bound_min_x << "\t" << obj.bound_min_y 
 				<< "\t" << obj.bound_max_x << "\t" << obj.bound_max_y 
 				<< "\t" << obj.centerpos_x << "\t" << obj.centerpos_y

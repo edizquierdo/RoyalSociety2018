@@ -6,7 +6,7 @@ from math import degrees
 
 import numpy as np
 import numpy.lib.recfunctions as rfn
-from nptyping import NDArray
+from nptyping import NDArray,StructuredType
 
 import matplotlib
 import matplotlib.pyplot as plt
@@ -106,9 +106,8 @@ def _get_fig_bounds(
 	])
 	
 	# print(f'> figsize:\t{figsize}')
-	figsize : NDArray[2, float] = figsize * figsize_scalar / max(figsize)
 
-	return figsize
+	return figsize * figsize_scalar / max(figsize)
 
 
 def _get_fig_bounds_box(
@@ -132,39 +131,45 @@ def _get_fig_bounds_box(
 """
 
 
-def read_body_data(filename : Path) -> NDArray[Any, CoordsRotArr]:
-		"""reads given tsv file into a numpy array
-		
-		array is a 2-D structured array of type `CoordsRotArr`
-		with `'x', 'y', 'phi'` fields for each segment
-		so essentially 3-D, where first index is timestep, second is segment, and third/field is x/y/phi
-		
-		### Parameters:
-		- `filename : Path`   
-		filename to read
-		
-		### Returns:
-		- `NDArray[Any, CoordsRotArr]` 
-		"""
-		data_raw : NDArray = np.genfromtxt(filename, delimiter = ' ', dtype = None)
+def read_body_data(filename : Path) -> NDArray[(Any,Any), CoordsRotArr]:
+	"""reads given tsv file into a numpy array
+	
+	array is a 2-D structured array of type `CoordsRotArr`
+	with `'x', 'y', 'phi'` fields for each segment
+	so essentially 3-D, where first index is timestep, second is segment, and third/field is x/y/phi
+	
+	### Parameters:
+	- `filename : Path`   
+	filename to read
+	
+	### Returns:
+	- `NDArray[Any, CoordsRotArr]` 
+	"""
+	# read in
+	data_raw : NDArray = np.genfromtxt(filename, delimiter = ' ', dtype = None)
 
-		data_raw = data_raw[:,1:]
+	# trim first variable (time)
+	data_raw = data_raw[:,1:]
 
-		n_tstep = data_raw.shape[0]
-		n_seg = int(data_raw.shape[1] / 3)
+	# compute dims
+	n_tstep = data_raw.shape[0]
+	n_seg = int(data_raw.shape[1] / 3)
 
-		data : NDArray[(n_tstep, n_seg), CoordsRotArr] = np.full(
-			shape = (n_tstep, n_seg),
-			fill_value = np.nan,
-			dtype = CoordsRotArr,
-		)
+	# allocate new array
+	# data : NDArray[(n_tstep, n_seg), CoordsRotArr] = np.full(
+	data : NDArray[(n_tstep, n_seg)] = np.full(
+		shape = (n_tstep, n_seg),
+		fill_value = np.nan,
+		dtype = CoordsRotArr,
+	)
 
-		for s in range(n_seg):
-			data[:, s]['x'] = data_raw[:, s*3]
-			data[:, s]['y'] = data_raw[:, s*3 + 1]
-			data[:, s]['phi'] = data_raw[:, s*3 + 2]
+	# organize by x pos, y pos, and rotation (phi)
+	for s in range(n_seg):
+		data[:, s]['x'] = data_raw[:, s*3]
+		data[:, s]['y'] = data_raw[:, s*3 + 1]
+		data[:, s]['phi'] = data_raw[:, s*3 + 2]
 
-		return data
+	return data
 
 
 def read_coll_objs_file(objs_file : str) -> Tuple[NDArray,NDArray]:
@@ -190,9 +195,11 @@ def read_coll_objs_file(objs_file : str) -> Tuple[NDArray,NDArray]:
 	return (np.array(blocks), np.array(vecs))
 
 
+# 	data : NDArray[Any, CoordsRotArr],
+# ) -> Tuple[NDArray[Any, CoordsArr], NDArray[Any, CoordsArr]]:
 def body_data_split_DV(
-		data : NDArray[Any, CoordsRotArr],
-	) -> Tuple[NDArray[Any, CoordsArr], NDArray[Any, CoordsArr]]:
+		data : NDArray,
+	) -> Tuple[NDArray, NDArray]:
 	"""splits a body data file into arrays of dorsal and ventral points
 	
 	takes in a `CoordsRotArr` (produced by `read_body_data()`)
@@ -344,7 +351,7 @@ def _plot_foodPos(ax : Axes, params : Path, fmt = 'bo'):
 			foodpos_x : float = float(params_data["ChemoReceptors"]["foodPos"]["x"])
 			foodpos_y : float = float(params_data["ChemoReceptors"]["foodPos"]["y"])
 	
-	ax.plot(foodpos_x, foodpos_y, fmt)
+			ax.plot(foodpos_x, foodpos_y, fmt)
 
 
 
@@ -365,12 +372,12 @@ def _draw_setup(
 		collobjs : Path = 'coll_objs.tsv',
 		params : Optional[Path] = 'params.json',
 		limit_frames : Optional[int] = None,
-		figsize_scalar : float = 6.0,
+		figsize_scalar : Optional[float] = None,
 		bounds : Optional[BoundingBox] = None,
-		pad_frac : float = 0.0,
+		pad_frac : Optional[float] = None,
 	) -> Tuple[
 		plt.figure, Axes, 
-		NDArray[(int,int), CoordsRotArr],
+		NDArray[(Any,Any), CoordsRotArr],
 		BoundingBox,
 	]:
 	"""sets up figure for drawing the worm
@@ -403,12 +410,19 @@ def _draw_setup(
 	   (defaults to `None`)
 	 - `pad_frac : float`   
 	   if auto generating bounds, pad the box by this fraction of the range on all sides
-	   (defaults to `1.0`)
+	   (defaults to `0.0`)
 	
 	### Returns:
 	 - `Tuple[plt.figure, Axes, NDArray[(int,int), CoordsRotArr],BoundingBox]` 
 	   returns figure (fig and ax objects), data, and bounding box of worm and objects
 	"""
+
+	# setting defaults
+	# ==============================
+	if figsize_scalar is None:
+		figsize_scalar = 6.0
+	if pad_frac is None:
+		pad_frac = 0.0
 
 	# getting the data
 	# ==============================
@@ -424,22 +438,27 @@ def _draw_setup(
 		data = data[:limit_frames]
 
 	# read collision objects
+	lst_collision_objects : List[CollisionObject] = list()
 	if os.path.isfile(collobjs):
-		lst_collision_objects : List[CollisionObject] = read_collobjs_tsv(collobjs)
+		lst_collision_objects = read_collobjs_tsv(collobjs)
 	else:
 		print(f'  >> WARNING: could not find file, skipping: {collobjs}')
-		lst_collision_objects : List[CollisionObject] = list()
 		
 
 	# get bounding boxes for contents
 	# ==============================
 
+	print(data.shape, data.dtype)
+	print('test',bounds)
+
 	# get bounds
-	bounds_objs : BoundingBox = get_bounds(collobjs)
+	bounds_objs : BoundingBox = get_bounds(lst_collision_objects)
 	bounds_worm : BoundingBox = _combine_bounds([
-		_bounds_tuples_to_bbox(arr_bounds(data[:,1]), arr_bounds(data[:,2])),
-		_bounds_tuples_to_bbox(arr_bounds(data[:,-3]), arr_bounds(data[:,-2])),
+		_bounds_tuples_to_bbox(arr_bounds(data['x'][:,0]), arr_bounds(data['y'][:,0])),
+		_bounds_tuples_to_bbox(arr_bounds(data['x'][:,-1]), arr_bounds(data['x'][:,-1])),
 	])
+
+	print(bounds_objs,bounds_worm)
 
 	# if no bounds given, replace with auto generated ones
 	if bounds is None:
@@ -447,6 +466,8 @@ def _draw_setup(
 
 		# pad bounds
 		bounds = pad_BoundingBox(bounds, pad_frac)
+	
+	print('test',bounds)
 
 	# set up figure things
 	# ==============================
@@ -495,47 +516,36 @@ class Plotters(object):
 	"""
 	@staticmethod
 	def pos(
+			# args passed down to `_draw_setup()`
 			rootdir : Path = 'data/run/',
 			bodydat : Path = 'body.dat',
 			collobjs : Path = 'coll_objs.tsv',
 			params : Optional[Path] = 'params.json',
-			idxs : Tuple[int,int] = (1,2),
+			limit_frames : Optional[int] = None,
+			figsize_scalar : Optional[float] = None,
+			pad_frac : Optional[float] = None,
+			# args specific to this plotter
+			idx : int = 0,
+			show : bool = True,
 		):
-		# append directory
-		bodydat = rootdir + bodydat
-		collobjs = rootdir + collobjs
-		params = rootdir + params if params is not None else None
 
-		# head_x = []
-		# head_y = []
-		# with open(bodydat, 'r') as fin:
-		# 	for line in fin:
-		# 		xy_temp = line.split()[ idxs[0] : idxs[1]+1 ]
-		# 		head_x.append(float(xy_temp[0]))
-		# 		head_y.append(float(xy_temp[1]))
-		
-		# read data
-		data_raw : NDArray = np.genfromtxt(bodydat, dtype = float, delimeter = ' ')
+		fix,ax,data,bounds = _draw_setup(
+			rootdir = rootdir,
+			bodydat = bodydat,
+			collobjs = collobjs,
+			params = params,
+			limit_frames = limit_frames,
+			figsize_scalar = figsize_scalar,
+			pad_frac = figsize_scalar,
+		)
 
-		head_x : NDArray[data_raw.shape[0], float] = data_raw[:,idxs[0]]
-		head_y : NDArray[data_raw.shape[0], float] = data_raw[:,idxs[1]]
+		head_data : NDArray[data.shape[0], CoordsRotArr] = data[:,idx]
 
-		# set up plotting
-		fig, ax = plt.subplots(1,1)
+		print(head_data.shape, head_data.dtype)
+		plt.plot(head_data['x'], head_data['y'])
 
-		# plot collision objects
-		if collobjs is not None:
-			_plot_collobjs(ax, read_collobjs_tsv(collobjs))
-		
-		# plot food position
-		if params is not None:
-			#  and os.path.isfile(params):
-			_plot_foodPos(ax, params)
-
-		print(len(head_x), len(head_y))
-		plt.axis('equal')
-		plt.plot(head_x, head_y)
-		plt.show()
+		if show:
+			plt.show()
 
 	"""
 	   ###    ##    ## #### ##     ##

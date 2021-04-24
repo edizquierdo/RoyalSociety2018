@@ -428,10 +428,10 @@ void Worm::Curvature(TVector<double> &c)
         a1 = atan2(dy1,dx1);
         a2 = atan2(dy2,dx2);
 
-        if (a1 > PI/2 and a2 < -PI/2)
+        if (a1 > PI/2 && a2 < -PI/2)
             a = (a1 - 2*PI) - a2;
         else
-            if (a1 < -PI/2 and a2 > PI/2)
+            if (a1 < -PI/2 && a2 > PI/2)
                 a = a1 - (a2 - 2*PI);
             else
                 a = a1-a2;

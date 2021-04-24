@@ -3,9 +3,9 @@ from typing import *
 
 import numpy as np
 
-Path = TypeVar('Path', str)
+Path = str
 AxBounds = Tuple[float,float]
-BoundingBox = TypeVar('BoundingBox', Dict[str,float])
+BoundingBox = Dict[str,float]
 
 def BOUNDS_TEMPLATE() -> BoundingBox:
 	return {
@@ -178,7 +178,7 @@ class CollisionObject(object):
 		attrs_lst = CollisionObject.get_attr_list(coll_type)
 
 		# check that we have the expected number of attributes
-		assert (len(line_lst) == len(attrs_lst)),f'incorrect number of attributes in line:\n\t{line}'
+		assert (len(line_lst) == len(attrs_lst)),f'incorrect number of attributes in line (expected {len(attrs_lst)}, got {len(line_lst)}):\n\t{line}\n\t{line_lst}'
 
 		# read them in
 		output : CollisionObject = CollisionObject(**{
@@ -258,18 +258,18 @@ def _combine_bounds(lst_bounds : List[BoundingBox]) -> BoundingBox:
 
 def get_bbox_ranges(bounds : BoundingBox) -> Tuple[float,float]:
 	return (
-		bounds['bounds_max_x'] - bounds['bounds_min_x'],
-		bounds['bounds_max_y'] - bounds['bounds_min_y'],
+		bounds['bound_max_x'] - bounds['bound_min_x'],
+		bounds['bound_max_y'] - bounds['bound_min_y'],
 	)
 
 def pad_BoundingBox(bounds : BoundingBox, pad_frac : float) -> BoundingBox:
 	x_range, y_range = get_bbox_ranges(bounds)
 
 	return {
-		'bound_min_x' : bounds['bounds_min_x'] - x_range * pad_frac,
-		'bound_min_y' : bounds['bounds_min_y'] - y_range * pad_frac,
-		'bound_max_x' : bounds['bounds_max_x'] + x_range * pad_frac,
-		'bound_max_y' : bounds['bounds_max_y'] + y_range * pad_frac,
+		'bound_min_x' : bounds['bound_min_x'] - x_range * pad_frac,
+		'bound_min_y' : bounds['bound_min_y'] - y_range * pad_frac,
+		'bound_max_x' : bounds['bound_max_x'] + x_range * pad_frac,
+		'bound_max_y' : bounds['bound_max_y'] + y_range * pad_frac,
 	}
 
 
